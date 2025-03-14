@@ -1,0 +1,460 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_editor/image_editor.dart';
+
+import 'easy_camera.dart';
+import 'enums.dart';
+import 'logger.dart';
+import 'result_widget.dart';
+
+typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashType mode);
+
+class CameraWidget extends StatefulWidget {
+  const CameraWidget({
+    super.key,
+    this.imageResolution = ImageResolution.medium,
+    this.defaultCameraType = CameraType.front,
+    this.showControls = true,
+    this.showCaptureControl = true,
+    this.showFlashControl = true,
+    this.showCameraTypeControl = true,
+    this.showCloseControl = true,
+    this.defaultFlashType = CameraFlashType.off,
+    this.orientation = CameraOrientation.portraitUp,
+    this.onCapture,
+    this.captureControlIcon,
+    this.typeControlIcon,
+    this.flashControlBuilder,
+    this.closeControlIcon,
+    this.imageScale = ImageScale.none,
+  });
+  final ImageResolution imageResolution;
+  final CameraType defaultCameraType;
+  final CameraFlashType defaultFlashType;
+  final CameraOrientation? orientation;
+  final bool showControls;
+  final bool showCaptureControl;
+  final bool showFlashControl;
+  final bool showCameraTypeControl;
+  final bool showCloseControl;
+  final void Function(XFile? image)? onCapture;
+  final Widget? captureControlIcon;
+  final Widget? typeControlIcon;
+  final FlashControlBuilder? flashControlBuilder;
+  final Widget? closeControlIcon;
+  final ImageScale imageScale;
+
+  @override
+  State<CameraWidget> createState() => _CameraWidgetState();
+}
+
+class _CameraWidgetState extends State<CameraWidget>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
+  final GlobalKey _cameraWidgetKey = GlobalKey();
+
+  bool _isClick = false;
+
+  bool _isAppInBackground = false;
+
+  CameraController? _controller;
+
+  int _currentFlashMode = 0;
+  final List<CameraFlashType> _availableFlashMode = <CameraFlashType>[
+    CameraFlashType.off,
+    CameraFlashType.auto,
+    CameraFlashType.always,
+  ];
+
+  int _currentCameraType = 0;
+  final List<CameraType> _availableCameraType = <CameraType>[];
+
+  void _getAllAvailableCameraType() {
+    for (final CameraDescription d in EasyCamera.cameras) {
+      final CameraType? type = d.lensDirection.cameraType;
+      if (type != null && !_availableCameraType.contains(type)) {
+        _availableCameraType.add(type);
+      }
+    }
+    try {
+      _currentCameraType = _availableCameraType.indexOf(widget.defaultCameraType);
+    } catch (e) {
+      logError(e.toString());
+    }
+  }
+
+  Future<void> _initCamera() async {
+    final List<CameraDescription> cameras =
+        EasyCamera.cameras
+            .where(
+              (CameraDescription c) =>
+                  c.lensDirection == _availableCameraType[_currentCameraType].cameraLensDirection,
+            )
+            .toList();
+
+    if (cameras.isNotEmpty) {
+      _controller = CameraController(
+        cameras.first,
+        widget.imageResolution.resolutionPreset,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+      );
+
+      await _controller!.initialize().then((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {});
+      });
+
+      await _controller!.setFocusMode(FocusMode.auto);
+
+      await _changeFlashMode(_availableFlashMode.indexOf(widget.defaultFlashType));
+
+      await _controller!.lockCaptureOrientation(widget.orientation?.deviceOrientation).then((_) {
+        if (mounted) setState(() {});
+      });
+    }
+  }
+
+  Future<void> _changeFlashMode(int index) async {
+    await _controller!.setFlashMode(_availableFlashMode[index].flashMode).then((_) {
+      if (mounted) setState(() => _currentFlashMode = index);
+    });
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    _getAllAvailableCameraType();
+    _initCamera();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    final CameraController? cameraController = _controller;
+    if (cameraController != null && cameraController.value.isInitialized) {
+      cameraController.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = _controller;
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+    if (state == AppLifecycleState.inactive) {
+      setState(() {
+        _isAppInBackground = true;
+      });
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
+      setState(() {
+        _isAppInBackground = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CameraController? cameraController = _controller;
+
+    final ui.Size size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body:
+          _isAppInBackground
+              ? Container(color: Colors.black)
+              : Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  if (cameraController != null && cameraController.value.isInitialized) ...<Widget>[
+                    if (widget.imageScale == ImageScale.none)
+                      Transform.scale(
+                        scale: 1.0,
+                        child: AspectRatio(
+                          aspectRatio: size.aspectRatio,
+                          child: OverflowBox(
+                            child: FittedBox(
+                              fit: BoxFit.fitHeight,
+                              child: SizedBox(
+                                width: size.width,
+                                height: size.width * cameraController.value.aspectRatio,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: <Widget>[CameraPreview(cameraController)],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      _cameraDisplayWidget(cameraController),
+                  ] else ...<Widget>[Container(color: Colors.black)],
+                  if (widget.showControls) ...<Widget>[
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ColoredBox(
+                          color: Colors.transparent,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 18,
+                            children: <Widget>[
+                              if (widget.showFlashControl)
+                                _flashControlWidget()
+                              else
+                                const SizedBox(height: 60, width: 60),
+
+                              if (widget.showCaptureControl) ...<Widget>[
+                                const SizedBox(width: 20),
+                                _captureControlWidget(),
+                                const SizedBox(width: 20),
+                              ],
+                              if (widget.showCameraTypeControl)
+                                _typeControlWidget()
+                              else
+                                const SizedBox(height: 60, width: 60),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (widget.showControls)
+                    Align(alignment: Alignment.topLeft, child: _clearWidget()),
+                ],
+              ),
+    );
+  }
+
+  Widget _cameraDisplayWidget(CameraController cameraController) {
+    final ui.Size size = MediaQuery.of(context).size;
+    final Widget area = ClipRect(
+      child: OverflowBox(
+        child: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: SizedBox(
+            width: size.width,
+            height: size.width * cameraController.value.aspectRatio,
+            child: Stack(children: <Widget>[CameraPreview(cameraController)]),
+          ),
+        ),
+      ),
+    );
+    return Stack(
+      children: <Widget>[
+        AspectRatio(
+          aspectRatio:
+              widget.imageScale == ImageScale.none ? size.aspectRatio : widget.imageScale.scale,
+          child: RepaintBoundary(key: _cameraWidgetKey, child: area),
+        ),
+      ],
+    );
+  }
+
+  Widget _captureControlWidget() {
+    final CameraController? cameraController = _controller;
+    return GestureDetector(
+      onTap:
+          cameraController != null && cameraController.value.isInitialized
+              ? _onTakePictureButtonPressed
+              : null,
+      child: Container(
+        color: Colors.transparent,
+        width: 80,
+        height: 80,
+        child:
+            widget.captureControlIcon ??
+            ClipOval(
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(8.0),
+                child: const Icon(Icons.camera_alt),
+              ),
+            ),
+      ),
+    );
+  }
+
+  Widget _flashControlWidget() {
+    final CameraController? cameraController = _controller;
+    final IconData icon =
+        _availableFlashMode[_currentFlashMode] == CameraFlashType.always
+            ? Icons.flash_on
+            : _availableFlashMode[_currentFlashMode] == CameraFlashType.off
+            ? Icons.flash_off
+            : Icons.flash_auto;
+
+    return GestureDetector(
+      onTap:
+          cameraController != null && cameraController.value.isInitialized
+              ? () => _changeFlashMode((_currentFlashMode + 1) % _availableFlashMode.length)
+              : null,
+      child: ColoredBox(
+        color: Colors.transparent,
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child:
+              widget.flashControlBuilder?.call(context, _availableFlashMode[_currentFlashMode]) ??
+              ClipOval(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  padding: const EdgeInsets.all(2.0),
+                  child: Icon(icon, color: Colors.white),
+                ),
+              ),
+        ),
+      ),
+    );
+  }
+
+  Widget _typeControlWidget() {
+    final CameraController? cameraController = _controller;
+    return GestureDetector(
+      onTap:
+          cameraController != null && cameraController.value.isInitialized
+              ? () {
+                _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
+                _initCamera();
+              }
+              : null,
+      child: Container(
+        color: Colors.transparent,
+        width: 60,
+        height: 60,
+        child:
+            widget.typeControlIcon ??
+            ClipOval(
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.3),
+                child: const Padding(
+                  padding: EdgeInsets.all(2.0),
+                  child: Icon(Icons.cameraswitch_outlined, color: Colors.white),
+                ),
+              ),
+            ),
+      ),
+    );
+  }
+
+  Widget _clearWidget() {
+    return IconButton(
+      iconSize: 30,
+      icon:
+          widget.closeControlIcon ??
+          CircleAvatar(
+            backgroundColor: Colors.black.withValues(alpha: 0.05),
+            child: const Padding(
+              padding: EdgeInsets.all(2.0),
+              child: Icon(Icons.clear, size: 30, color: Colors.white),
+            ),
+          ),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future<void> _onTakePictureButtonPressed() async {
+    if (_isClick) {
+      return;
+    }
+    _isClick = true;
+    final CameraController? cameraController = _controller;
+    try {
+      if (cameraController!.value.isStreamingImages) {
+        await cameraController.stopImageStream();
+      }
+      Future<dynamic>.delayed(const Duration(milliseconds: 100), () {
+        _takePicture().then((XFile? file) async {
+          if (file != null) {
+            _isClick = false;
+
+            _isClick = false;
+            if (mounted) {
+              final dynamic result = await Navigator.push(
+                context,
+                MaterialPageRoute<Object?>(
+                  builder: (BuildContext context) => ResultWidget(file: File(file.path)),
+                ),
+              );
+              if (result != null && widget.onCapture != null) {
+                widget.onCapture!(file);
+              }
+            }
+          }
+        });
+      });
+    } catch (e) {
+      _isClick = false;
+      logError(e.toString());
+    }
+  }
+
+  Future<XFile?> _takePicture() async {
+    final CameraController? cameraController = _controller;
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      logError('Error: select a camera first.');
+      return null;
+    }
+
+    if (cameraController.value.isTakingPicture) {
+      return null;
+    }
+
+    try {
+      final XFile file = await cameraController.takePicture();
+      final String path = file.path;
+      Uint8List? bytes = await file.readAsBytes();
+      if (widget.imageScale == ImageScale.none) {
+        if (cameraController.description.lensDirection == CameraLensDirection.front) {
+          final ImageEditorOption option = ImageEditorOption();
+          option.addOption(const FlipOption());
+          bytes = await ImageEditor.editImage(image: bytes, imageEditorOption: option);
+          await File(path).delete();
+          File(path).writeAsBytesSync(bytes!);
+        }
+      } else {
+        Uint8List? corpBytes = bytes;
+        final ImageEditorOption option = ImageEditorOption();
+        final ui.Image image = await _uint8ListChangeImage(bytes);
+        final double width = image.width.toDouble();
+        final double height = image.height.toDouble();
+        final double realHeight = width / widget.imageScale.scale;
+        final double topY = (height - realHeight) / 2;
+        option.addOption(ClipOption(y: topY, width: width, height: realHeight));
+        if (cameraController.description.lensDirection == CameraLensDirection.front) {
+          option.addOption(const FlipOption());
+        }
+        corpBytes = await ImageEditor.editImage(image: corpBytes, imageEditorOption: option);
+        await File(path).delete();
+        File(path).writeAsBytesSync(corpBytes!);
+      }
+      return file;
+    } on CameraException catch (e) {
+      logError(e.code, e.description);
+      return null;
+    }
+  }
+
+  Future<ui.Image> _uint8ListChangeImage(Uint8List list) async {
+    final ui.Codec codec = await ui.instantiateImageCodec(list);
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    return frame.image;
+  }
+}

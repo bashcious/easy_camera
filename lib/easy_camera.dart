@@ -1,8 +1,7 @@
+library;
 
-import 'easy_camera_platform_interface.dart';
-
-class EasyCamera {
-  Future<String?> getPlatformVersion() {
-    return EasyCameraPlatform.instance.getPlatformVersion();
-  }
-}
+export 'src/easy_camera.dart';
+export 'src/enums.dart';
+export 'src/logger.dart';
+export 'src/result_widget.dart';
+export 'src/camera_widget.dart';
