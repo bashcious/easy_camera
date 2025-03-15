@@ -118,7 +118,7 @@ enum CameraPreviewSize { fill, normal }
 extension CameraPreviewSizeExtension on CameraPreviewSize {
   double get scale {
     return switch (this) {
-      CameraPreviewSize.normal => 6 / 9,
+      CameraPreviewSize.normal => 5 / 7,
       CameraPreviewSize.fill => 0,
     };
   }

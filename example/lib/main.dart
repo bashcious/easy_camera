@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() async {
     // Create a CameraConfig instance with custom settings.
     CameraConfig config = CameraConfig(
-      imageResolution: ImageResolution.max,
+      imageResolution: ImageResolution.high,
       defaultCameraType: CameraType.rear,
       showCameraTypeControl: true,
       cameraPreviewSize: CameraPreviewSize.normal,

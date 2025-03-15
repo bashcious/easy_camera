@@ -655,9 +655,8 @@ class _CameraWidgetState extends State<CameraWidget>
         await cameraController.stopImageStream();
       }
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
       final XFile? file = await _takePicture();
+
       _isClick = false;
 
       if (file != null && widget.onCapture != null) {
