@@ -38,7 +38,7 @@ class EasyCamera {
   /// - [config]: The configuration settings for the camera.
   ///
   /// Returns an [XFile] containing the captured image, or `null` if the user cancels.
-  static Future<XFile?> selfieCameraFile(BuildContext context, CameraConfig config) async {
+  static Future<XFile?> capturePhoto(BuildContext context, CameraConfig config) async {
     XFile? cameraFile;
 
     // Displays the camera UI inside a dialog.

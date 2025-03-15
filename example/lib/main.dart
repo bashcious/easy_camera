@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
       showFlashControl: true,
     );
 
-    var file = await EasyCamera.selfieCameraFile(context, config);
+    var file = await EasyCamera.capturePhoto(context, config);
     if (file != null) {
       setState(() {
         currentFile = File(file.path);
