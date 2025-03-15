@@ -3,10 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class ResultWidget extends StatelessWidget {
-  const ResultWidget({
-    super.key,
-    required this.file,
-  });
+  const ResultWidget({super.key, required this.file});
 
   final File file;
 
@@ -15,26 +12,12 @@ class ResultWidget extends StatelessWidget {
     return Scaffold(
       body: Stack(
         alignment: Alignment.bottomCenter,
-        children: [
+        children: <Widget>[
           Column(
-            children: [
-              Expanded(
-                flex: 1,
-                child: Container(
-                  color: Colors.black,
-                ),
-              ),
-              Image.file(
-                file,
-                width: double.maxFinite,
-                fit: BoxFit.fitWidth,
-              ),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  color: Colors.black,
-                ),
-              ),
+            children: <Widget>[
+              Expanded(child: Container(color: Colors.black)),
+              Image.file(file, width: double.maxFinite, fit: BoxFit.fitWidth),
+              Expanded(child: Container(color: Colors.black)),
             ],
           ),
           SafeArea(
@@ -45,17 +28,16 @@ class ResultWidget extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   InkWell(
                     onTap: () {
                       Navigator.pop(context);
                     },
                     child: Container(
                       color: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: const Text(
-                        "Retry",
+                        'Retry',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -64,19 +46,16 @@ class ResultWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width / 3),
                   InkWell(
                     onTap: () {
                       Navigator.pop(context, true);
                     },
                     child: Container(
                       color: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: const Text(
-                        "Confirm",
+                        'Confirm',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,

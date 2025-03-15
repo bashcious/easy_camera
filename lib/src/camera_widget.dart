@@ -11,7 +11,6 @@ import 'package:image_editor/image_editor.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
 import 'logger.dart';
-import 'result_widget.dart';
 
 typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashType mode);
 
@@ -386,17 +385,20 @@ class _CameraWidgetState extends State<CameraWidget>
             _isClick = false;
 
             _isClick = false;
-            if (mounted) {
-              final dynamic result = await Navigator.push(
-                context,
-                MaterialPageRoute<Object?>(
-                  builder: (BuildContext context) => ResultWidget(file: File(file.path)),
-                ),
-              );
-              if (result != null && widget.onCapture != null) {
-                widget.onCapture!(file);
-              }
+            if (widget.onCapture != null) {
+              widget.onCapture!(file);
             }
+            // if (mounted) {
+            //   final dynamic result = await Navigator.push(
+            //     context,
+            //     MaterialPageRoute<Object?>(
+            //       builder: (BuildContext context) => ResultWidget(file: File(file.path)),
+            //     ),
+            //   );
+            //   if (result != null && widget.onCapture != null) {
+            //     widget.onCapture!(file);
+            //   }
+            // }
           }
         });
       });
