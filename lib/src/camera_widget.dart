@@ -56,7 +56,6 @@ class CameraWidget extends StatefulWidget {
     this.showCameraTypeControl = true,
     this.showCloseControl = true,
     this.defaultFlashType = CameraFlashType.off,
-    this.orientation = CameraOrientation.portraitUp,
     this.onCapture,
     this.captureControlIcon,
     this.switchCameraIcon,
@@ -76,9 +75,6 @@ class CameraWidget extends StatefulWidget {
 
   /// The default flash mode (on, off, auto).
   final CameraFlashType defaultFlashType;
-
-  /// The camera orientation (portrait or landscape).
-  final CameraOrientation? orientation;
 
   /// Determines whether camera controls (flash, switch camera, etc.) should be displayed.
   final bool showControls;
@@ -190,6 +186,12 @@ class _CameraWidgetState extends State<CameraWidget>
   void initState() {
     super.initState();
 
+    // Lock screen orientation to portrait
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     /// Observes app lifecycle changes (e.g., background/foreground state).
     WidgetsBinding.instance.addObserver(this);
 
@@ -229,6 +231,9 @@ class _CameraWidgetState extends State<CameraWidget>
   void dispose() {
     /// Removes this widget from the app lifecycle observer list.
     WidgetsBinding.instance.removeObserver(this);
+
+    // Reset to system default orientations when leaving the screen
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
 
     /// Disposes resources only if the camera controller is initialized.
     if (_controller?.value.isInitialized ?? false) {
@@ -319,11 +324,6 @@ class _CameraWidgetState extends State<CameraWidget>
 
       // Set the default flash mode
       await _changeFlashMode(_availableFlashMode.indexOf(widget.defaultFlashType));
-
-      // Lock camera orientation if specified
-      if (widget.orientation != null) {
-        await _controller!.lockCaptureOrientation(widget.orientation!.deviceOrientation);
-      }
 
       // Update UI state
       setState(() {});

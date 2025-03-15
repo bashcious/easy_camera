@@ -12,7 +12,6 @@ class CameraConfig {
     this.imageResolution = ImageResolution.medium,
     this.defaultCameraType = CameraType.front,
     this.defaultFlashType = CameraFlashType.off,
-    this.orientation,
     this.showControls = true,
     this.showCaptureControl = true,
     this.showFlashControl = true,
@@ -36,9 +35,6 @@ class CameraConfig {
 
   /// The default flash setting.
   final CameraFlashType defaultFlashType;
-
-  /// The camera orientation (portrait or landscape).
-  final CameraOrientation? orientation;
 
   /// Whether to show camera control buttons.
   final bool showControls;

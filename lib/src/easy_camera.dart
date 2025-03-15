@@ -50,7 +50,6 @@ class EasyCamera {
           imageResolution: config.imageResolution,
           defaultCameraType: config.defaultCameraType,
           defaultFlashType: config.defaultFlashType,
-          orientation: config.orientation,
           showControls: config.showControls,
           showCaptureControl: config.showCaptureControl,
           showFlashControl: config.showFlashControl,
