@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 
 enum ImageResolution {
-   /// 352x288 on iOS, 240p (320x240) on Android and Web
+  /// 352x288 on iOS, 240p (320x240) on Android and Web
   low,
 
   /// 480p (640x480 on iOS, 720x480 on Android and Web)
@@ -45,7 +45,7 @@ enum CameraType {
   front,
 
   /// Back facing camera (a user looking at the screen is not seen by the camera).
-  back,
+  rear,
 
   /// External camera which may not be mounted to the device.
   external,
@@ -55,7 +55,7 @@ extension CameraTypeExtension on CameraType {
   CameraLensDirection? get cameraLensDirection {
     return switch (this) {
       CameraType.front => CameraLensDirection.front,
-      CameraType.back => CameraLensDirection.back,
+      CameraType.rear => CameraLensDirection.back,
       CameraType.external => CameraLensDirection.external,
     };
   }
@@ -65,7 +65,7 @@ extension CameraLensDirectionExtension on CameraLensDirection {
   CameraType? get cameraType {
     return switch (this) {
       CameraLensDirection.front => CameraType.front,
-      CameraLensDirection.back => CameraType.back,
+      CameraLensDirection.back => CameraType.rear,
       CameraLensDirection.external => CameraType.external,
     };
   }
@@ -113,26 +113,13 @@ enum CameraOrientation {
   landscapeRight,
 }
 
-enum ImageScale {
-  none,
+enum CameraPreviewSize { fill, normal }
 
-  /// 16:9
-  small,
-
-  /// 1:1
-  middle,
-
-  /// 3:4
-  big,
-}
-
-extension ImageScaleExtension on ImageScale {
+extension CameraPreviewSizeExtension on CameraPreviewSize {
   double get scale {
     return switch (this) {
-      ImageScale.small => 16 / 9,
-      ImageScale.middle => 1 / 1,
-      ImageScale.big => 4 / 5,
-      ImageScale.none => 0,
+      CameraPreviewSize.normal => 6 / 9,
+      CameraPreviewSize.fill => 0,
     };
   }
 }

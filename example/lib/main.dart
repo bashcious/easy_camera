@@ -36,15 +36,16 @@ class _MyHomePageState extends State<MyHomePage> {
   File? currentFile;
 
   void _incrementCounter() async {
-    var file = await EasyCamera.selfieCameraFile(
-      context,
-      imageResolution: ImageResolution.high,
-      defaultCameraType: CameraType.back,
-      defaultFlashType: CameraFlashType.off,
-      imageScale: ImageScale.big,
+    // Create a CameraConfig instance with custom settings.
+    CameraConfig config = CameraConfig(
+      imageResolution: ImageResolution.max,
+      defaultCameraType: CameraType.rear,
       showCameraTypeControl: true,
+      cameraPreviewSize: CameraPreviewSize.normal,
       showFlashControl: true,
     );
+
+    var file = await EasyCamera.selfieCameraFile(context, config);
     if (file != null) {
       setState(() {
         currentFile = File(file.path);
