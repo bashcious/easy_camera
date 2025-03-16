@@ -10,6 +10,7 @@ import 'package:image_editor/image_editor.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
 import 'logger.dart';
+import 'switch_camera_icon.dart';
 import 'take_photo_button.dart';
 
 typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashType mode);
@@ -327,7 +328,7 @@ class _CameraWidgetState extends State<CameraWidget>
       await _changeFlashMode(_availableFlashMode.indexOf(widget.defaultFlashType));
 
       // Update UI state
-      setState(() {});
+      // setState(() {});
     } catch (e) {
       logError('Camera initialization failed: $e');
     }
@@ -518,7 +519,16 @@ class _CameraWidgetState extends State<CameraWidget>
 
         // Switch camera button (or placeholder if disabled)
         if (widget.showCameraTypeControl)
-          _typeControlWidget()
+          SwitchCameraIcon(
+            onTap:
+                _controller?.value.isInitialized ?? false
+                    ? () {
+                      _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
+
+                      _initializeCamera();
+                    }
+                    : null,
+          )
         else
           const SizedBox(height: 60, width: 60),
       ],
@@ -574,40 +584,6 @@ class _CameraWidgetState extends State<CameraWidget>
     };
 
     return flashIcons[flashType] ?? Icons.flash_auto;
-  }
-
-  Widget _typeControlWidget() {
-    final CameraController? cameraController = _controller;
-    return GestureDetector(
-      onTap:
-          cameraController?.value.isInitialized ?? false
-              ? () {
-                setState(() {
-                  _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
-                });
-                _initializeCamera();
-              }
-              : null,
-      child: Container(
-        color: Colors.transparent,
-        width: 60,
-        height: 60,
-        child: widget.switchCameraIcon ?? _buildTypeControlIcon(),
-      ),
-    );
-  }
-
-  /// Builds the camera switch icon with consistent styling.
-  Widget _buildTypeControlIcon() {
-    return ClipOval(
-      child: ColoredBox(
-        color: Colors.black.withOpacity(0.3),
-        child: const Padding(
-          padding: EdgeInsets.all(2.0),
-          child: Icon(Icons.cameraswitch_outlined, color: Colors.white),
-        ),
-      ),
-    );
   }
 
   Widget _clearWidget() {
