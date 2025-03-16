@@ -10,6 +10,7 @@ import 'package:image_editor/image_editor.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
 import 'logger.dart';
+import 'result_widget.dart';
 import 'switch_camera_icon.dart';
 import 'take_photo_button.dart';
 
@@ -621,10 +622,17 @@ class _CameraWidgetState extends State<CameraWidget>
 
       final XFile? file = await _takePicture();
 
-      _isClick = false;
-
-      if (file != null && widget.onCapture != null) {
-        widget.onCapture!(file);
+      if (file != null && mounted) {
+        _isClick = false;
+        final dynamic result = await Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) => ResultWidget(file: File(file.path)),
+          ),
+        );
+        if (result != null && widget.onCapture != null) {
+          widget.onCapture!(file);
+        }
       }
     } catch (e) {
       logError(e.toString());
