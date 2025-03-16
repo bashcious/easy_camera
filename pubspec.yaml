@@ -8,16 +8,17 @@ environment:
   flutter: ">=3.3.0"
 
 dependencies:
+  camera: ^0.10.6
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.1.8
-  camera: ^0.10.6
   image_editor: ^1.6.0
+  photo_view: ^0.15.0
+  plugin_platform_interface: ^2.1.8
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
   plugin:

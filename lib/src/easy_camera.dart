@@ -67,6 +67,7 @@ class EasyCamera {
           minAvailableZoom: config.minAvailableZoom,
           maxAvailableZoom: config.maxAvailableZoom,
           focusColor: config.focusColor,
+          showImagePreview: config.showImagePreview,
         );
       },
     );

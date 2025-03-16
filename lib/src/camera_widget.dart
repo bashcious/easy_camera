@@ -9,8 +9,8 @@ import 'package:image_editor/image_editor.dart';
 
 import 'easy_camera.dart';
 import 'enums.dart';
+import 'image_viewer.dart';
 import 'logger.dart';
-import 'result_widget.dart';
 import 'switch_camera_icon.dart';
 import 'take_photo_button.dart';
 
@@ -68,6 +68,7 @@ class CameraWidget extends StatefulWidget {
     this.minAvailableZoom = 1.0,
     this.maxAvailableZoom = 1.0,
     this.focusColor = Colors.white,
+    this.showImagePreview = true,
   });
 
   /// The resolution of the captured image (low, medium, high).
@@ -120,6 +121,9 @@ class CameraWidget extends StatefulWidget {
 
   /// The color of the focus indicator.
   final Color? focusColor;
+
+  /// Determines whether to show the captured image preview.
+  final bool showImagePreview;
 
   @override
   State<CameraWidget> createState() => _CameraWidgetState();
@@ -624,14 +628,22 @@ class _CameraWidgetState extends State<CameraWidget>
 
       if (file != null && mounted) {
         _isClick = false;
-        final dynamic result = await Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (BuildContext context) => ResultWidget(file: File(file.path)),
-          ),
-        );
-        if (result != null && widget.onCapture != null) {
-          widget.onCapture!(file);
+        if (widget.showImagePreview) {
+          final dynamic result = await Navigator.push(
+            context,
+            MaterialPageRoute<dynamic>(
+              builder:
+                  (BuildContext context) =>
+                      ImageViewer(image: _fileToImageProvider(File(file.path))),
+            ),
+          );
+          if (result != null && widget.onCapture != null) {
+            widget.onCapture!(file);
+          }
+        } else {
+          if (widget.onCapture != null) {
+            widget.onCapture!(file);
+          }
         }
       }
     } catch (e) {
@@ -851,5 +863,9 @@ class _CameraWidgetState extends State<CameraWidget>
     final ui.Codec codec = await ui.instantiateImageCodec(list);
     final ui.FrameInfo frame = await codec.getNextFrame();
     return frame.image;
+  }
+
+  Future<ImageProvider<Object>?> _fileToImageProvider(File file) {
+    return Future<ImageProvider<Object>?>.value(FileImage(file));
   }
 }

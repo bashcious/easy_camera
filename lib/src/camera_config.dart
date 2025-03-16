@@ -25,6 +25,7 @@ class CameraConfig {
     this.minAvailableZoom = 1.0,
     this.maxAvailableZoom = 1.0,
     this.focusColor = Colors.white,
+    this.showImagePreview = true
   });
 
   /// The resolution of the captured image.
@@ -74,4 +75,7 @@ class CameraConfig {
 
   /// The color of the focus indicator.
   final Color? focusColor;
+
+  /// Whether to show the captured image preview.
+  final bool showImagePreview;
 }
