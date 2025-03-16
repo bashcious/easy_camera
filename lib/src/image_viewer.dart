@@ -35,12 +35,15 @@ class ImageViewer extends StatelessWidget {
                   children: <Widget>[
                     Align(
                       alignment: Alignment.topLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 8, left: 16, bottom: 5),
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, color: Colors.white),
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        iconSize: 30,
+                        icon: CircleAvatar(
+                          backgroundColor: Colors.black.withOpacity(0.05), // Fixed method usage
+                          child: const Padding(
+                            padding: EdgeInsets.all(2.0),
+                            child: Icon(Icons.clear, size: 30, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
