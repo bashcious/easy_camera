@@ -57,7 +57,7 @@ class EasyCamera {
           showCloseControl: config.showCloseControl,
           onCapture: (XFile? file) {
             cameraFile = file;
-            Navigator.pop(context);
+            // Navigator.pop(context);
           },
           captureControlIcon: config.captureControlIcon,
           switchCameraIcon: config.typeControlIcon,
