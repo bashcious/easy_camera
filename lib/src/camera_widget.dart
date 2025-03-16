@@ -10,6 +10,7 @@ import 'package:image_editor/image_editor.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
 import 'logger.dart';
+import 'take_photo_button.dart';
 
 typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashType mode);
 
@@ -528,22 +529,9 @@ class _CameraWidgetState extends State<CameraWidget>
   Widget _buildCaptureButton() {
     final bool isCameraReady = _controller?.value.isInitialized ?? false;
 
-    return GestureDetector(
+    return TakePhotoButton(
+      key: const ValueKey<String>('takePhotoButton'),
       onTap: isCameraReady ? _onTakePictureButtonPressed : null,
-      child: Container(
-        color: Colors.transparent,
-        width: 80,
-        height: 80,
-        child:
-            widget.captureControlIcon ??
-            ClipOval(
-              child: Container(
-                color: Colors.white,
-                padding: const EdgeInsets.all(8.0),
-                child: const Icon(Icons.camera_alt),
-              ),
-            ),
-      ),
     );
   }
 
