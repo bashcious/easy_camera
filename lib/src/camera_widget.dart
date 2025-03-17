@@ -249,6 +249,8 @@ class _CameraWidgetState extends State<CameraWidget>
       _controller?.dispose(); // Dispose of the camera controller.
     }
 
+    debugPrint('Cameradisposed: true');
+
     super.dispose();
   }
 
