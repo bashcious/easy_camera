@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:easy_camera/easy_camera.dart';
+import 'package:easy_camera_example/camera_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -43,12 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
       showCameraTypeControl: true,
       cameraPreviewSize: CameraPreviewSize.normal,
       showFlashControl: true,
+      showImagePreview: false,
     );
 
-    var file = await EasyCamera.capturePhoto(context, config);
-    if (file != null) {
+    var returnedFile = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CameraScreen(config: config)),
+    );
+    if (returnedFile is XFile? && returnedFile != null) {
       setState(() {
-        currentFile = File(file.path);
+        currentFile = File(returnedFile.path);
       });
     }
   }

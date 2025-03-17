@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_editor/image_editor.dart';
 
+import 'camera_config.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
 import 'image_viewer.dart';
@@ -36,7 +37,7 @@ typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashT
 ///
 /// Example Usage:
 /// ```dart
-/// CameraWidget(
+/// EasyCameraWidget(
 ///   defaultCameraType: CameraType.rear,
 ///   showFlashControl: true,
 ///   minAvailableZoom: 1.0,
@@ -48,88 +49,17 @@ typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashT
 ///   },
 /// )
 /// ```
-class CameraWidget extends StatefulWidget {
-  const CameraWidget({
-    super.key,
-    this.imageResolution = ImageResolution.medium,
-    this.defaultCameraType = CameraType.front,
-    this.showControls = true,
-    this.showCaptureControl = true,
-    this.showFlashControl = true,
-    this.showCameraTypeControl = true,
-    this.showCloseControl = true,
-    this.defaultFlashType = CameraFlashType.off,
-    this.onCapture,
-    this.captureControlIcon,
-    this.switchCameraIcon,
-    this.flashControlBuilder,
-    this.closeControlIcon,
-    this.cameraPreviewSize = CameraPreviewSize.fill,
-    this.minAvailableZoom = 1.0,
-    this.maxAvailableZoom = 1.0,
-    this.focusColor = Colors.white,
-    this.showImagePreview = true,
-  });
+class EasyCameraWidget extends StatefulWidget {
+  const EasyCameraWidget({super.key, required this.config, required this.onCapture});
 
-  /// The resolution of the captured image (low, medium, high).
-  final ImageResolution imageResolution;
-
-  /// The default camera type (front or rear).
-  final CameraType defaultCameraType;
-
-  /// The default flash mode (on, off, auto).
-  final CameraFlashType defaultFlashType;
-
-  /// Determines whether camera controls (flash, switch camera, etc.) should be displayed.
-  final bool showControls;
-
-  /// Determines whether the capture button should be displayed.
-  final bool showCaptureControl;
-
-  /// Determines whether the flash toggle button should be displayed.
-  final bool showFlashControl;
-
-  /// Determines whether the switch camera button should be displayed.
-  final bool showCameraTypeControl;
-
-  /// Determines whether the close button should be displayed.
-  final bool showCloseControl;
-
-  /// Callback function triggered when an image is captured.
-  final void Function(XFile? image)? onCapture;
-
-  /// Custom widget for the capture button.
-  final Widget? captureControlIcon;
-
-  /// Custom widget for the switch camera button.
-  final Widget? switchCameraIcon;
-
-  /// Custom widget builder for the flash control button.
-  final FlashControlBuilder? flashControlBuilder;
-
-  /// Custom widget for the close button.
-  final Widget? closeControlIcon;
-
-  /// Determines how the image is scaled (fill, normal).
-  final CameraPreviewSize cameraPreviewSize;
-
-  /// The minimum zoom level available for the camera.
-  final double? minAvailableZoom;
-
-  /// The maximum zoom level available for the camera.
-  final double? maxAvailableZoom;
-
-  /// The color of the focus indicator.
-  final Color? focusColor;
-
-  /// Determines whether to show the captured image preview.
-  final bool showImagePreview;
+  final CameraConfig config;
+  final void Function(XFile?)? onCapture;
 
   @override
-  State<CameraWidget> createState() => _CameraWidgetState();
+  State<EasyCameraWidget> createState() => _CameraWidgetState();
 }
 
-class _CameraWidgetState extends State<CameraWidget>
+class _CameraWidgetState extends State<EasyCameraWidget>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   /// A key to uniquely identify the CameraWidget.
   final GlobalKey _cameraWidgetKey = GlobalKey();
@@ -203,8 +133,8 @@ class _CameraWidgetState extends State<CameraWidget>
     WidgetsBinding.instance.addObserver(this);
 
     /// Sets the minimum and maximum available zoom levels from widget properties.
-    _minAvailableZoom = widget.minAvailableZoom;
-    _maxAvailableZoom = widget.maxAvailableZoom;
+    _minAvailableZoom = widget.config.minAvailableZoom;
+    _maxAvailableZoom = widget.config.maxAvailableZoom;
 
     /// Initializes the focus frame position as an infinite offset.
     _focusFrame = ValueNotifier<Offset>(Offset.infinite);
@@ -249,8 +179,6 @@ class _CameraWidgetState extends State<CameraWidget>
       _controller?.dispose(); // Dispose of the camera controller.
     }
 
-    debugPrint('Cameradisposed: true');
-
     super.dispose();
   }
 
@@ -286,7 +214,7 @@ class _CameraWidgetState extends State<CameraWidget>
     }
 
     // Set the default camera type index safely
-    final int defaultIndex = _availableCameraType.indexOf(widget.defaultCameraType);
+    final int defaultIndex = _availableCameraType.indexOf(widget.config.defaultCameraType);
     _currentCameraType = defaultIndex != -1 ? defaultIndex : 0;
   }
 
@@ -309,7 +237,7 @@ class _CameraWidgetState extends State<CameraWidget>
     // Create a new CameraController with selected settings
     _controller = CameraController(
       cameras.first,
-      widget.imageResolution.resolutionPreset,
+      widget.config.imageResolution.resolutionPreset,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
@@ -332,7 +260,7 @@ class _CameraWidgetState extends State<CameraWidget>
       await _controller!.setFocusMode(FocusMode.auto);
 
       // Set the default flash mode
-      await _changeFlashMode(_availableFlashMode.indexOf(widget.defaultFlashType));
+      await _changeFlashMode(_availableFlashMode.indexOf(widget.config.defaultFlashType));
 
       // Update UI state
       // setState(() {});
@@ -364,63 +292,69 @@ class _CameraWidgetState extends State<CameraWidget>
   @override
   Widget build(BuildContext context) {
     final CameraController? cameraController = _controller;
-    final ui.Size screenSize = MediaQuery.of(context).size;
+    final ui.Size screenSize = MediaQuery.sizeOf(context);
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body:
-          _isAppInBackground
-              ? Container(color: Colors.black) // Show a black screen when app is in the background
-              : Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  // Display the camera preview if the controller is initialized
-                  if (cameraController != null && cameraController.value.isInitialized) ...<Widget>[
-                    if (widget.cameraPreviewSize == CameraPreviewSize.fill)
-                      Transform.scale(
-                        scale: 1.0,
-                        child: AspectRatio(
-                          aspectRatio: screenSize.aspectRatio,
-                          child: OverflowBox(
-                            child: FittedBox(
-                              fit: BoxFit.fitHeight,
-                              child: SizedBox(
-                                width: screenSize.width,
-                                height: screenSize.width * cameraController.value.aspectRatio,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: <Widget>[
-                                    _autoFocusAnimationWidget(
-                                      camera: _buildCameraView(cameraController),
-                                    ),
-                                  ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body:
+            _isAppInBackground
+                ? Container(
+                  color: Colors.black,
+                ) // Show a black screen when app is in the background
+                : Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    // Display the camera preview if the controller is initialized
+                    if (cameraController != null &&
+                        cameraController.value.isInitialized) ...<Widget>[
+                      if (widget.config.cameraPreviewSize == CameraPreviewSize.fill)
+                        Transform.scale(
+                          scale: 1.0,
+                          child: AspectRatio(
+                            aspectRatio: screenSize.aspectRatio,
+                            child: OverflowBox(
+                              child: FittedBox(
+                                fit: BoxFit.fitHeight,
+                                child: SizedBox(
+                                  width: screenSize.width,
+                                  height: screenSize.width * cameraController.value.aspectRatio,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: <Widget>[
+                                      _autoFocusAnimationWidget(
+                                        camera: _buildCameraView(cameraController),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
+                        )
+                      else
+                        _buildCameraPreview(cameraController),
+                    ] else
+                      Container(color: Colors.black), // Placeholder if the camera is not ready
+                    // Camera control buttons (flash, capture, switch camera)
+                    if (widget.config.showControls &&
+                        widget.config.cameraPreviewSize == CameraPreviewSize.fill) ...<Widget>[
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ColoredBox(color: Colors.transparent, child: _controlsWidget()),
                         ),
-                      )
-                    else
-                      _buildCameraPreview(cameraController),
-                  ] else
-                    Container(color: Colors.black), // Placeholder if the camera is not ready
-                  // Camera control buttons (flash, capture, switch camera)
-                  if (widget.showControls &&
-                      widget.cameraPreviewSize == CameraPreviewSize.fill) ...<Widget>[
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ColoredBox(color: Colors.transparent, child: _controlsWidget()),
                       ),
-                    ),
-                  ],
+                    ],
 
-                  // Close button (top-left)
-                  if (widget.showControls && widget.cameraPreviewSize == CameraPreviewSize.fill)
-                    Align(alignment: Alignment.topLeft, child: _clearWidget()),
-                ],
-              ),
+                    // Close button (top-left)
+                    if (widget.config.showControls &&
+                        widget.config.cameraPreviewSize == CameraPreviewSize.fill)
+                      Align(alignment: Alignment.topLeft, child: _clearWidget()),
+                  ],
+                ),
+      ),
     );
   }
 
@@ -477,14 +411,14 @@ class _CameraWidgetState extends State<CameraWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (widget.showControls && widget.cameraPreviewSize != CameraPreviewSize.fill)
+        if (widget.config.showControls && widget.config.cameraPreviewSize != CameraPreviewSize.fill)
           _clearWidget(),
         // Camera preview with aspect ratio maintained
         Expanded(
           child: Stack(
             children: <Widget>[
               AspectRatio(
-                aspectRatio: widget.cameraPreviewSize.scale,
+                aspectRatio: widget.config.cameraPreviewSize.scale,
                 child: RepaintBoundary(key: _cameraWidgetKey, child: area),
               ),
             ],
@@ -498,7 +432,8 @@ class _CameraWidgetState extends State<CameraWidget>
           alignment: Alignment.topCenter,
           padding: const EdgeInsets.symmetric(vertical: 20),
           child:
-              (widget.showControls && widget.cameraPreviewSize != CameraPreviewSize.fill)
+              (widget.config.showControls &&
+                      widget.config.cameraPreviewSize != CameraPreviewSize.fill)
                   ? _controlsWidget()
                   : const SizedBox.shrink(),
         ),
@@ -512,20 +447,20 @@ class _CameraWidgetState extends State<CameraWidget>
       spacing: 18,
       children: <Widget>[
         // Flash control button (or placeholder if disabled)
-        if (widget.showFlashControl)
+        if (widget.config.showFlashControl)
           _buildFlashToggleButton()
         else
           const SizedBox(height: 60, width: 60),
 
         // Capture button with spacing
-        if (widget.showCaptureControl) ...<Widget>[
+        if (widget.config.showCaptureControl) ...<Widget>[
           const SizedBox(width: 20),
           _buildCaptureButton(),
           const SizedBox(width: 20),
         ],
 
         // Switch camera button (or placeholder if disabled)
-        if (widget.showCameraTypeControl)
+        if (widget.config.showCameraTypeControl)
           SwitchCameraIcon(
             onTap:
                 _controller?.value.isInitialized ?? false
@@ -569,7 +504,7 @@ class _CameraWidgetState extends State<CameraWidget>
           width: 60,
           height: 60,
           child:
-              widget.flashControlBuilder?.call(context, currentFlashMode) ??
+              widget.config.flashControlBuilder?.call(context, currentFlashMode) ??
               ClipOval(
                 child: Container(
                   color: Colors.black.withOpacity(0.3),
@@ -596,7 +531,7 @@ class _CameraWidgetState extends State<CameraWidget>
   Widget _clearWidget() {
     return IconButton(
       iconSize: 30,
-      icon: widget.closeControlIcon ?? _buildCloseIcon(),
+      icon: widget.config.closeControlIcon ?? _buildCloseIcon(),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -630,7 +565,7 @@ class _CameraWidgetState extends State<CameraWidget>
 
       if (file != null && mounted) {
         _isClick = false;
-        if (widget.showImagePreview) {
+        if (widget.config.showImagePreview) {
           final dynamic result = await Navigator.push(
             context,
             MaterialPageRoute<dynamic>(
@@ -677,7 +612,7 @@ class _CameraWidgetState extends State<CameraWidget>
       final Uint8List bytes = await file.readAsBytes();
 
       // If no scaling is required, check if the front camera was used and flip the image.
-      if (widget.cameraPreviewSize == CameraPreviewSize.fill) {
+      if (widget.config.cameraPreviewSize == CameraPreviewSize.fill) {
         if (_controller!.description.lensDirection == CameraLensDirection.front) {
           final ImageEditorOption option = ImageEditorOption();
           option.addOption(const FlipOption()); // Flip the image for front camera shots.
@@ -697,7 +632,8 @@ class _CameraWidgetState extends State<CameraWidget>
         final ui.Image image = await _convertUint8ListToImage(bytes);
         final double width = image.width.toDouble();
         final double height = image.height.toDouble();
-        final double realHeight = width / widget.cameraPreviewSize.scale; // Calculate new height.
+        final double realHeight =
+            width / widget.config.cameraPreviewSize.scale; // Calculate new height.
         final double topY = (height - realHeight) / 2; // Center cropping position.
 
         final ImageEditorOption option = ImageEditorOption();
@@ -770,7 +706,8 @@ class _CameraWidgetState extends State<CameraWidget>
                           color: Colors.transparent, // Ensure background is clear.
                           border: Border.all(
                             color:
-                                widget.focusColor ?? Colors.white, // Use user-defined focus color.
+                                widget.config.focusColor ??
+                                Colors.white, // Use user-defined focus color.
                             width: thicknessTween?.value ?? 0, // Adjust thickness with animation.
                           ),
                         ),
