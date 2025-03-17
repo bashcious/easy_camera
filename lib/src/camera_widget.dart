@@ -10,6 +10,7 @@ import 'package:image_editor/image_editor.dart';
 import 'camera_config.dart';
 import 'easy_camera.dart';
 import 'enums.dart';
+import 'flash_icon.dart';
 import 'image_viewer.dart';
 import 'logger.dart';
 import 'switch_camera_icon.dart';
@@ -461,7 +462,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
         // Switch camera button (or placeholder if disabled)
         if (widget.config.showCameraTypeControl)
-          SwitchCameraIcon(
+          CameraSwitchIcon(
             onTap:
                 _controller?.value.isInitialized ?? false
                     ? () {
@@ -496,24 +497,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     final CameraFlashType currentFlashMode = _availableFlashMode[_currentFlashMode];
     final IconData flashIcon = _getFlashIcon(currentFlashMode);
 
-    return GestureDetector(
+    return CameraFlashIcon(
+      flashIcon: flashIcon,
       onTap: () => _changeFlashMode((_currentFlashMode + 1) % _availableFlashMode.length),
-      child: ColoredBox(
-        color: Colors.transparent,
-        child: SizedBox(
-          width: 60,
-          height: 60,
-          child:
-              widget.config.flashControlBuilder?.call(context, currentFlashMode) ??
-              ClipOval(
-                child: Container(
-                  color: Colors.black.withOpacity(0.3),
-                  padding: const EdgeInsets.all(2.0),
-                  child: Icon(flashIcon, color: Colors.white),
-                ),
-              ),
-        ),
-      ),
+      flashControlBuilder: widget.config.flashControlBuilder?.call(context, currentFlashMode),
     );
   }
 

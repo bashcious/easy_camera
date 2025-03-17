@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
       showCameraTypeControl: true,
       cameraPreviewSize: CameraPreviewSize.normal,
       showFlashControl: true,
-      showImagePreview: false,
+      showImagePreview: true,
     );
 
     var returnedFile = await Navigator.push(
