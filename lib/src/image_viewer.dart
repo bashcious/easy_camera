@@ -144,13 +144,16 @@ class _ImageViewerState extends State<ImageViewer> {
                     ),
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   bottom: 40,
                   left: 0,
                   right: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[CloseIcon(), ConfirmButton()],
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 40),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[CloseIcon(), ConfirmButton()],
+                    ),
                   ),
                 ),
               ],
