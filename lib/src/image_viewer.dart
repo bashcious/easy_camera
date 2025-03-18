@@ -148,11 +148,9 @@ class _ImageViewerState extends State<ImageViewer> {
                   bottom: 40,
                   left: 0,
                   right: 0,
-                  child: SafeArea(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[CloseIcon(), ConfirmButton()],
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[CloseIcon(), ConfirmButton()],
                   ),
                 ),
               ],
