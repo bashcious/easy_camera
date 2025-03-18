@@ -263,6 +263,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       // Set the default flash mode
       await _changeFlashMode(_availableFlashMode.indexOf(widget.config.defaultFlashType));
 
+      // Lock capture orientation to portrait mode
+      await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
+
       // Update UI state
       // setState(() {});
     } catch (e) {
