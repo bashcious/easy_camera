@@ -114,6 +114,28 @@ const CameraConfig({
 | `focusColor`             | Color of the focus indicator                     |
 | `showImagePreview`       | Show preview after capturing an image            |
 
+### Camera Preview Size Enum
+
+```dart
+enum CameraPreviewSize { fill, normal }
+
+extension CameraPreviewSizeExtension on CameraPreviewSize {
+  double get scale {
+    return switch (this) {
+      CameraPreviewSize.normal => 5 / 7,
+      CameraPreviewSize.fill => 0,
+    };
+  }
+}
+```
+
+### Logging
+To enable logs, set printLogs: true during initialization.
+
+```dart
+await EasyCamera.initialize(printLogs: true);
+```
+
 ## License
 This project is licensed under the MIT License. Feel free to use and modify it as needed.
 
