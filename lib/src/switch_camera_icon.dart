@@ -32,7 +32,9 @@ class _CameraSwitchIconState extends State<CameraSwitchIcon> with SingleTickerPr
   }
 
   void _animateRotation() {
-    if (_isAnimating) return;
+    if (_isAnimating) {
+      return;
+    }
 
     setState(() => _isAnimating = true);
     _controller.forward(from: 0.0);
@@ -73,7 +75,7 @@ class _CameraSwitchIconState extends State<CameraSwitchIcon> with SingleTickerPr
 
         // If orientation changes, animate to new angle
         if (_targetRotationAngle != newAngle) {
-          Future.delayed(const Duration(milliseconds: 300), () {
+          Future<dynamic>.delayed(const Duration(milliseconds: 300), () {
             _updateRotationAngle(newAngle);
           });
         }

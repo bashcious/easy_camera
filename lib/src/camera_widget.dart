@@ -452,43 +452,49 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       children: <Widget>[
         // Flash control button (or placeholder if disabled)
         if (widget.config.showFlashControl)
-          _buildFlashToggleButton()
+          Flexible(child: _buildFlashToggleButton())
         else
           const SizedBox(height: 60, width: 60),
 
         // Capture button with spacing
-        if (widget.config.showCaptureControl) ...<Widget>[
+        if (widget.config.showCaptureIcon) ...<Widget>[
           const SizedBox(width: 20),
           _buildCaptureButton(),
           const SizedBox(width: 20),
         ],
 
         // Switch camera button (or placeholder if disabled)
-        if (widget.config.showCameraTypeControl)
-          CameraSwitchIcon(
-            onTap:
-                _controller?.value.isInitialized ?? false
-                    ? () {
-                      _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
-
-                      _initializeCamera();
-                    }
-                    : null,
-          )
+        if (widget.config.showCameraSwitchIcon)
+          _buildCameraSwitchButton()
         else
           const SizedBox(height: 60, width: 60),
       ],
     );
   }
 
+  Widget _buildCameraSwitchButton() {
+    return widget.config.cameraSwitchIcon ??
+        CameraSwitchIcon(
+          onTap:
+              _controller?.value.isInitialized ?? false
+                  ? () {
+                    _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
+
+                    _initializeCamera();
+                  }
+                  : null,
+        );
+  }
+
   /// Builds the capture button widget.
   Widget _buildCaptureButton() {
     final bool isCameraReady = _controller?.value.isInitialized ?? false;
 
-    return TakePhotoButton(
-      key: const ValueKey<String>('takePhotoButton'),
-      onTap: isCameraReady ? _onTakePictureButtonPressed : null,
-    );
+    return widget.config.captureIcon ??
+        TakePhotoButton(
+          key: const ValueKey<String>('takePhotoButton'),
+          onTap: isCameraReady ? _onTakePictureButtonPressed : null,
+        );
   }
 
   /// Builds the flash control button.
@@ -521,18 +527,21 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   Widget _clearWidget() {
     return IconButton(
       iconSize: 30,
-      icon: widget.config.closeControlIcon ?? _buildCloseIcon(),
+      icon: widget.config.closeIcon ?? _buildCloseIcon(),
       onPressed: () => Navigator.pop(context),
     );
   }
 
   /// Builds the default close button icon with consistent styling.
   Widget _buildCloseIcon() {
-    return CircleAvatar(
-      backgroundColor: Colors.black.withOpacity(0.05), // Fixed method usage
-      child: const Padding(
-        padding: EdgeInsets.all(2.0),
-        child: Icon(Icons.clear, size: 30, color: Colors.white),
+    return Visibility(
+      visible: widget.config.showCloseIcon,
+      child: CircleAvatar(
+        backgroundColor: Colors.black.withOpacity(0.05), // Fixed method usage
+        child: const Padding(
+          padding: EdgeInsets.all(2.0),
+          child: Icon(Icons.clear, size: 30, color: Colors.white),
+        ),
       ),
     );
   }

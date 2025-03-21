@@ -41,10 +41,11 @@ class _MyHomePageState extends State<MyHomePage> {
     CameraConfig config = CameraConfig(
       imageResolution: ImageResolution.high,
       defaultCameraType: CameraType.rear,
-      showCameraTypeControl: true,
+      showCameraSwitchIcon: true,
       cameraPreviewSize: CameraPreviewSize.normal,
       showFlashControl: true,
       showImagePreview: true,
+      showCloseIcon: true,
     );
 
     var returnedFile = await Navigator.push(

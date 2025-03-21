@@ -13,19 +13,19 @@ class CameraConfig {
     this.defaultCameraType = CameraType.front,
     this.defaultFlashType = CameraFlashType.off,
     this.showControls = true,
-    this.showCaptureControl = true,
+    this.showCaptureIcon = true,
     this.showFlashControl = true,
-    this.showCameraTypeControl = true,
-    this.showCloseControl = true,
-    this.captureControlIcon,
-    this.typeControlIcon,
+    this.showCameraSwitchIcon = true,
+    this.showCloseIcon = true,
+    this.captureIcon,
+    this.cameraSwitchIcon,
     this.flashControlBuilder,
-    this.closeControlIcon,
+    this.closeIcon,
     this.cameraPreviewSize = CameraPreviewSize.fill,
     this.minAvailableZoom = 1.0,
     this.maxAvailableZoom = 1.0,
     this.focusColor = Colors.white,
-    this.showImagePreview = true
+    this.showImagePreview = true,
   });
 
   /// The resolution of the captured image.
@@ -41,28 +41,28 @@ class CameraConfig {
   final bool showControls;
 
   /// Whether to show the capture button.
-  final bool showCaptureControl;
+  final bool showCaptureIcon;
 
   /// Whether to show the flash toggle button.
   final bool showFlashControl;
 
   /// Whether to show the camera switch button.
-  final bool showCameraTypeControl;
+  final bool showCameraSwitchIcon;
 
   /// Whether to show the close button.
-  final bool showCloseControl;
+  final bool showCloseIcon;
 
   /// Custom widget for the capture button.
-  final Widget? captureControlIcon;
+  final Widget? captureIcon;
 
   /// Custom widget for the camera switch button.
-  final Widget? typeControlIcon;
+  final Widget? cameraSwitchIcon;
 
   /// Custom builder for the flash control button.
   final FlashControlBuilder? flashControlBuilder;
 
   /// Custom widget for the close button.
-  final Widget? closeControlIcon;
+  final Widget? closeIcon;
 
   /// Scaling option for the camera preview.
   final CameraPreviewSize cameraPreviewSize;
