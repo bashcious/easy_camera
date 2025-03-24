@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
 class TakePhotoButton extends StatefulWidget {
-  const TakePhotoButton({required Key key, required this.onTap}) : super(key: key);
+  const TakePhotoButton({required Key key, required this.onTap})
+    : super(key: key);
   final void Function()? onTap;
 
   @override
   State createState() => _TakePhotoButtonState();
 }
 
-class _TakePhotoButtonState extends State<TakePhotoButton> with SingleTickerProviderStateMixin {
+class _TakePhotoButtonState extends State<TakePhotoButton>
+    with SingleTickerProviderStateMixin {
   AnimationController? _animationController;
   double? _scale;
   final Duration _duration = const Duration(milliseconds: 100);
 
   @override
   void initState() {
-    _animationController = AnimationController(vsync: this, duration: _duration, upperBound: 0.1)
-      ..addListener(() {
-        setState(() {});
-      });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: _duration,
+      upperBound: 0.1,
+    )..addListener(() {
+      setState(() {});
+    });
     super.initState();
   }
 
