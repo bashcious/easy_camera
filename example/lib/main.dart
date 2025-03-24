@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter_easy_camera/easy_camera.dart';
-import 'package:easy_camera_example/camera_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easy_camera/easy_camera.dart';
+
+import 'camera_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,4 +1,4 @@
-package com.codewithemmany.easy_camera
+package com.codewithemmany.flutter_easy_camera
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall

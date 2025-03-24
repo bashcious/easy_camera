@@ -1,4 +1,4 @@
-name: easy_camera_example
+name: flutter_easy_camera_example
 description: "Demonstrates how to use the easy_camera plugin."
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
