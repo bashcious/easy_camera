@@ -1,10 +1,10 @@
 import Flutter
 import UIKit
 
-public class EasyCameraPlugin: NSObject, FlutterPlugin {
+public class FlutterEasyCameraPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "easy_camera", binaryMessenger: registrar.messenger())
-    let instance = EasyCameraPlugin()
+    let instance = FlutterEasyCameraPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 

@@ -1,4 +1,4 @@
-import 'package:easy_camera/easy_camera.dart';
+import 'package:flutter_easy_camera/easy_camera.dart';
 import 'package:flutter/material.dart';
 
 class CameraScreen extends StatelessWidget {

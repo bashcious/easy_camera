@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:easy_camera/easy_camera.dart';
+import 'package:flutter_easy_camera/easy_camera.dart';
 import 'package:easy_camera_example/camera_screen.dart';
 import 'package:flutter/material.dart';
 

@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  easy_camera:
+  flutter_easy_camera:
     path: ../
 
   cupertino_icons: ^1.0.8
