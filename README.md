@@ -1,6 +1,6 @@
 # EasyCamera
 
-EasyCamera is a Flutter plugin designed to simplify camera integration with customizable configurations. It provides a flexible and easy-to-use interface for capturing images while allowing developers to configure camera settings, preview styles, and control visibility.
+EasyCamera is a Flutter plugin that simplifies camera integration with customizable configurations. It provides a flexible and intuitive interface for capturing images while allowing developers to configure camera settings, preview styles, and control visibility.
 
 ## Features
 - Initialize and fetch available cameras
@@ -45,10 +45,10 @@ final CameraConfig config = CameraConfig(
   defaultCameraType: CameraType.front,
   defaultFlashType: CameraFlashType.off,
   showControls: true,
-  showCaptureControl: true,
+  showCaptureIcon: true,
   showFlashControl: true,
-  showCameraTypeControl: true,
-  showCloseControl: true,
+  showCameraSwitchIcon: true,
+  showCloseIcon: true,
   cameraPreviewSize: CameraPreviewSize.fill,
   focusColor: Colors.blue,
   showImagePreview: true,
@@ -62,10 +62,8 @@ Use `EasyCamera.cameraView` to display the camera:
 EasyCamera.cameraView(
   config: config,
   onCapture: (XFile? file) async {
-    if (file != null) {
-      if (context.mounted) {
-        Navigator.pop(context, file);
-      }
+    if (file != null && context.mounted) {
+      Navigator.pop(context, file);
     }
   },
 );
@@ -73,7 +71,7 @@ EasyCamera.cameraView(
 
 ## Camera Configuration
 
-The `CameraConfig` class allows you to customize various settings:
+The `CameraConfig` class allows customization of various camera settings:
 
 ```dart
 const CameraConfig({
@@ -81,14 +79,14 @@ const CameraConfig({
   this.defaultCameraType = CameraType.front,
   this.defaultFlashType = CameraFlashType.off,
   this.showControls = true,
-  this.showCaptureControl = true,
+  this.showCaptureIcon = true,
   this.showFlashControl = true,
-  this.showCameraTypeControl = true,
-  this.showCloseControl = true,
-  this.captureControlIcon,
-  this.typeControlIcon,
+  this.showCameraSwitchIcon = true,
+  this.showCloseIcon = true,
+  this.captureIcon,
+  this.cameraSwitchIcon,
   this.flashControlBuilder,
-  this.closeControlIcon,
+  this.closeIcon,
   this.cameraPreviewSize = CameraPreviewSize.fill,
   this.minAvailableZoom = 1.0,
   this.maxAvailableZoom = 1.0,
@@ -104,10 +102,10 @@ const CameraConfig({
 | `defaultCameraType`      | Front or back camera                             |
 | `defaultFlashType`       | Flash mode (on, off, auto)                       |
 | `showControls`           | Show or hide all camera controls                 |
-| `showCaptureControl`     | Show capture button                              |
+| `showCaptureIcon`        | Show capture button                              |
 | `showFlashControl`       | Show flash toggle button                         |
-| `showCameraTypeControl`  | Show switch camera button                        |
-| `showCloseControl`       | Show close button                                |
+| `showCameraSwitchIcon`   | Show switch camera button                        |
+| `showCloseIcon`          | Show close button                                |
 | `cameraPreviewSize`      | Preview scaling (fill, fit)                      |
 | `minAvailableZoom`       | Minimum zoom level                               |
 | `maxAvailableZoom`       | Maximum zoom level                               |
@@ -130,7 +128,7 @@ extension CameraPreviewSizeExtension on CameraPreviewSize {
 ```
 
 ### Logging
-To enable logs, set printLogs: true during initialization.
+To enable logs, set `printLogs: true` during initialization.
 
 ```dart
 await EasyCamera.initialize(printLogs: true);
