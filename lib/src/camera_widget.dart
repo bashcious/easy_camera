@@ -16,7 +16,8 @@ import 'logger.dart';
 import 'switch_camera_icon.dart';
 import 'take_photo_button.dart';
 
-typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashType mode);
+typedef FlashControlBuilder =
+    Widget Function(BuildContext context, CameraFlashType mode);
 
 /// A customizable camera widget that provides an interface for capturing images
 /// with various configurations such as resolution, camera type, flash control,
@@ -51,7 +52,11 @@ typedef FlashControlBuilder = Widget Function(BuildContext context, CameraFlashT
 /// )
 /// ```
 class EasyCameraWidget extends StatefulWidget {
-  const EasyCameraWidget({super.key, required this.config, required this.onCapture});
+  const EasyCameraWidget({
+    super.key,
+    required this.config,
+    required this.onCapture,
+  });
 
   final CameraConfig config;
   final void Function(XFile?)? onCapture;
@@ -147,16 +152,14 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     );
 
     /// Creates an opacity animation for the focus indicator, fading out with a bounce effect.
-    opacityTween = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _animationController!, curve: Curves.bounceOut));
+    opacityTween = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController!, curve: Curves.bounceOut),
+    );
 
     /// Creates an animation for the focus indicator thickness, shrinking smoothly.
-    thicknessTween = Tween<double>(
-      begin: 3.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _animationController!, curve: Curves.bounceInOut));
+    thicknessTween = Tween<double>(begin: 3.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController!, curve: Curves.bounceInOut),
+    );
 
     /// Fetches all available camera types (e.g., front/rear).
     _getAllAvailableCameraType();
@@ -215,7 +218,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     }
 
     // Set the default camera type index safely
-    final int defaultIndex = _availableCameraType.indexOf(widget.config.defaultCameraType);
+    final int defaultIndex = _availableCameraType.indexOf(
+      widget.config.defaultCameraType,
+    );
     _currentCameraType = defaultIndex != -1 ? defaultIndex : 0;
   }
 
@@ -226,7 +231,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         EasyCamera.cameras
             .where(
               (CameraDescription c) =>
-                  c.lensDirection == _availableCameraType[_currentCameraType].cameraLensDirection,
+                  c.lensDirection ==
+                  _availableCameraType[_currentCameraType].cameraLensDirection,
             )
             .toList();
 
@@ -252,8 +258,12 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
       // Fetch the available zoom range
       final List<Future<void>> zoomLevelFutures = <Future<void>>[
-        _controller!.getMaxZoomLevel().then((double value) => _maxAvailableZoom = value),
-        _controller!.getMinZoomLevel().then((double value) => _minAvailableZoom = value),
+        _controller!.getMaxZoomLevel().then(
+          (double value) => _maxAvailableZoom = value,
+        ),
+        _controller!.getMinZoomLevel().then(
+          (double value) => _minAvailableZoom = value,
+        ),
       ];
       await Future.wait(zoomLevelFutures);
 
@@ -261,7 +271,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       await _controller!.setFocusMode(FocusMode.auto);
 
       // Set the default flash mode
-      await _changeFlashMode(_availableFlashMode.indexOf(widget.config.defaultFlashType));
+      await _changeFlashMode(
+        _availableFlashMode.indexOf(widget.config.defaultFlashType),
+      );
 
       // Lock capture orientation to portrait mode
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
@@ -276,7 +288,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   /// Changes the camera flash mode based on the provided index.
   Future<void> _changeFlashMode(int index) async {
     if (_controller == null || !_controller!.value.isInitialized) {
-      logError('Flash mode change failed: CameraController is not initialized.');
+      logError(
+        'Flash mode change failed: CameraController is not initialized.',
+      );
       return;
     }
 
@@ -312,7 +326,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                     // Display the camera preview if the controller is initialized
                     if (cameraController != null &&
                         cameraController.value.isInitialized) ...<Widget>[
-                      if (widget.config.cameraPreviewSize == CameraPreviewSize.fill)
+                      if (widget.config.cameraPreviewSize ==
+                          CameraPreviewSize.fill)
                         Transform.scale(
                           scale: 1.0,
                           child: AspectRatio(
@@ -322,12 +337,16 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                                 fit: BoxFit.fitHeight,
                                 child: SizedBox(
                                   width: screenSize.width,
-                                  height: screenSize.width * cameraController.value.aspectRatio,
+                                  height:
+                                      screenSize.width *
+                                      cameraController.value.aspectRatio,
                                   child: Stack(
                                     fit: StackFit.expand,
                                     children: <Widget>[
                                       _autoFocusAnimationWidget(
-                                        camera: _buildCameraView(cameraController),
+                                        camera: _buildCameraView(
+                                          cameraController,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -339,23 +358,33 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                       else
                         _buildCameraPreview(cameraController),
                     ] else
-                      Container(color: Colors.black), // Placeholder if the camera is not ready
+                      Container(
+                        color: Colors.black,
+                      ), // Placeholder if the camera is not ready
                     // Camera control buttons (flash, capture, switch camera)
                     if (widget.config.showControls &&
-                        widget.config.cameraPreviewSize == CameraPreviewSize.fill) ...<Widget>[
+                        widget.config.cameraPreviewSize ==
+                            CameraPreviewSize.fill) ...<Widget>[
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: ColoredBox(color: Colors.transparent, child: _controlsWidget()),
+                          child: ColoredBox(
+                            color: Colors.transparent,
+                            child: _controlsWidget(),
+                          ),
                         ),
                       ),
                     ],
 
                     // Close button (top-left)
                     if (widget.config.showControls &&
-                        widget.config.cameraPreviewSize == CameraPreviewSize.fill)
-                      Align(alignment: Alignment.topLeft, child: _clearWidget()),
+                        widget.config.cameraPreviewSize ==
+                            CameraPreviewSize.fill)
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: _clearWidget(),
+                      ),
                   ],
                 ),
       ),
@@ -383,7 +412,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
               onScaleUpdate: _handleScaleUpdate,
 
               /// Handles focus when the user taps the preview
-              onTapDown: (TapDownDetails details) => _onViewFinderTap(details, constraints),
+              onTapDown:
+                  (TapDownDetails details) =>
+                      _onViewFinderTap(details, constraints),
 
               /// Plays the autofocus animation when tap is released
               onTapUp: _onTapPlayFocusAnimation,
@@ -405,7 +436,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
             width: size.width,
             height: size.width * controller.value.aspectRatio,
             child: Stack(
-              children: <Widget>[_autoFocusAnimationWidget(camera: _buildCameraView(controller))],
+              children: <Widget>[
+                _autoFocusAnimationWidget(camera: _buildCameraView(controller)),
+              ],
             ),
           ),
         ),
@@ -415,7 +448,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (widget.config.showControls && widget.config.cameraPreviewSize != CameraPreviewSize.fill)
+        if (widget.config.showControls &&
+            widget.config.cameraPreviewSize != CameraPreviewSize.fill)
           _clearWidget(),
         // Camera preview with aspect ratio maintained
         Expanded(
@@ -478,7 +512,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           onTap:
               _controller?.value.isInitialized ?? false
                   ? () {
-                    _currentCameraType = (_currentCameraType + 1) % _availableCameraType.length;
+                    _currentCameraType =
+                        (_currentCameraType + 1) % _availableCameraType.length;
 
                     _initializeCamera();
                   }
@@ -503,23 +538,31 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       return const SizedBox(width: 60, height: 60);
     }
 
-    final CameraFlashType currentFlashMode = _availableFlashMode[_currentFlashMode];
+    final CameraFlashType currentFlashMode =
+        _availableFlashMode[_currentFlashMode];
     final IconData flashIcon = _getFlashIcon(currentFlashMode);
 
     return CameraFlashIcon(
       flashIcon: flashIcon,
-      onTap: () => _changeFlashMode((_currentFlashMode + 1) % _availableFlashMode.length),
-      flashControlBuilder: widget.config.flashControlBuilder?.call(context, currentFlashMode),
+      onTap:
+          () => _changeFlashMode(
+            (_currentFlashMode + 1) % _availableFlashMode.length,
+          ),
+      flashControlBuilder: widget.config.flashControlBuilder?.call(
+        context,
+        currentFlashMode,
+      ),
     );
   }
 
   /// Returns the corresponding flash mode icon.
   IconData _getFlashIcon(CameraFlashType flashType) {
-    const Map<CameraFlashType, IconData> flashIcons = <CameraFlashType, IconData>{
-      CameraFlashType.always: Icons.flash_on,
-      CameraFlashType.off: Icons.flash_off,
-      CameraFlashType.auto: Icons.flash_auto,
-    };
+    const Map<CameraFlashType, IconData> flashIcons =
+        <CameraFlashType, IconData>{
+          CameraFlashType.always: Icons.flash_on,
+          CameraFlashType.off: Icons.flash_off,
+          CameraFlashType.auto: Icons.flash_auto,
+        };
 
     return flashIcons[flashType] ?? Icons.flash_auto;
   }
@@ -537,7 +580,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     return Visibility(
       visible: widget.config.showCloseIcon,
       child: CircleAvatar(
-        backgroundColor: Colors.black.withOpacity(0.05), // Fixed method usage
+        backgroundColor: Colors.black.withValues(
+          alpha: 0.05,
+        ), // Fixed method usage
         child: const Padding(
           padding: EdgeInsets.all(2.0),
           child: Icon(Icons.clear, size: 30, color: Colors.white),
@@ -612,9 +657,12 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
       // If no scaling is required, check if the front camera was used and flip the image.
       if (widget.config.cameraPreviewSize == CameraPreviewSize.fill) {
-        if (_controller!.description.lensDirection == CameraLensDirection.front) {
+        if (_controller!.description.lensDirection ==
+            CameraLensDirection.front) {
           final ImageEditorOption option = ImageEditorOption();
-          option.addOption(const FlipOption()); // Flip the image for front camera shots.
+          option.addOption(
+            const FlipOption(),
+          ); // Flip the image for front camera shots.
 
           // Process the image and replace the file with the flipped version.
           final Uint8List? processedBytes = await ImageEditor.editImage(
@@ -623,7 +671,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           );
           if (processedBytes != null) {
             await File(file.path).delete(); // Delete the original file.
-            await File(file.path).writeAsBytes(processedBytes); // Write the flipped image.
+            await File(
+              file.path,
+            ).writeAsBytes(processedBytes); // Write the flipped image.
           }
         }
       } else {
@@ -632,14 +682,19 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         final double width = image.width.toDouble();
         final double height = image.height.toDouble();
         final double realHeight =
-            width / widget.config.cameraPreviewSize.scale; // Calculate new height.
-        final double topY = (height - realHeight) / 2; // Center cropping position.
+            width /
+            widget.config.cameraPreviewSize.scale; // Calculate new height.
+        final double topY =
+            (height - realHeight) / 2; // Center cropping position.
 
         final ImageEditorOption option = ImageEditorOption();
-        option.addOption(ClipOption(y: topY, width: width, height: realHeight)); // Crop image.
+        option.addOption(
+          ClipOption(y: topY, width: width, height: realHeight),
+        ); // Crop image.
 
         // Flip image if taken from the front camera.
-        if (_controller!.description.lensDirection == CameraLensDirection.front) {
+        if (_controller!.description.lensDirection ==
+            CameraLensDirection.front) {
           option.addOption(const FlipOption());
         }
 
@@ -651,14 +706,19 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
         if (processedBytes != null) {
           await File(file.path).delete(); // Delete the original file.
-          await File(file.path).writeAsBytes(processedBytes); // Write the edited image.
+          await File(
+            file.path,
+          ).writeAsBytes(processedBytes); // Write the edited image.
         }
       }
 
       // Return the final processed image file.
       return file;
     } on CameraException catch (e) {
-      logError('CameraException: ${e.code}', e.description ?? 'No description available');
+      logError(
+        'CameraException: ${e.code}',
+        e.description ?? 'No description available',
+      );
       return null;
     } catch (e) {
       logError('Unexpected error while taking picture: $e');
@@ -676,7 +736,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
         // Listens for focus point changes and updates the UI accordingly.
         ValueListenableBuilder<Offset>(
-          valueListenable: _focusFrame ?? ValueNotifier<Offset>(Offset.infinite),
+          valueListenable:
+              _focusFrame ?? ValueNotifier<Offset>(Offset.infinite),
           builder: (BuildContext context, ui.Offset offset, Widget? child) {
             // If no focus position is set or animation is unavailable, hide the focus frame.
             if (offset.isInfinite || _animationController == null) {
@@ -697,17 +758,22 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                     top: offset.dy,
 
                     child: Opacity(
-                      opacity: opacityTween?.value ?? 0, // Apply animated opacity effect.
+                      opacity:
+                          opacityTween?.value ??
+                          0, // Apply animated opacity effect.
 
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.transparent, // Ensure background is clear.
+                          color:
+                              Colors.transparent, // Ensure background is clear.
                           border: Border.all(
                             color:
                                 widget.config.focusColor ??
                                 Colors.white, // Use user-defined focus color.
-                            width: thicknessTween?.value ?? 0, // Adjust thickness with animation.
+                            width:
+                                thicknessTween?.value ??
+                                0, // Adjust thickness with animation.
                           ),
                         ),
                         child: child, // Placeholder for the focus frame.
@@ -717,7 +783,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                 );
               },
               // Defines the autofocus frame size.
-              child: const SizedBox(height: _autoFocusFrameSize, width: _autoFocusFrameSize),
+              child: const SizedBox(
+                height: _autoFocusFrameSize,
+                width: _autoFocusFrameSize,
+              ),
             );
           },
         ),

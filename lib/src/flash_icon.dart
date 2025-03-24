@@ -25,8 +25,10 @@ class _CameraFlashIconState extends State<CameraFlashIcon> {
 
   double _getRotationAngle(NativeDeviceOrientation orientation) {
     return switch (orientation) {
-      NativeDeviceOrientation.landscapeLeft => math.pi / 2, // Rotate +90 degrees
-      NativeDeviceOrientation.landscapeRight => -math.pi / 2, // Rotate -90 degrees
+      NativeDeviceOrientation.landscapeLeft =>
+        math.pi / 2, // Rotate +90 degrees
+      NativeDeviceOrientation.landscapeRight =>
+        -math.pi / 2, // Rotate -90 degrees
       NativeDeviceOrientation.portraitDown => math.pi, // Upside down
       (NativeDeviceOrientation.portraitUp || NativeDeviceOrientation.unknown) =>
         0, // Default portrait
@@ -44,9 +46,8 @@ class _CameraFlashIconState extends State<CameraFlashIcon> {
     return NativeDeviceOrientationReader(
       useSensor: true,
       builder: (BuildContext context) {
-        final NativeDeviceOrientation orientation = NativeDeviceOrientationReader.orientation(
-          context,
-        );
+        final NativeDeviceOrientation orientation =
+            NativeDeviceOrientationReader.orientation(context);
         final double newAngle = _getRotationAngle(orientation);
 
         if (_targetRotationAngle != newAngle) {
@@ -61,11 +62,17 @@ class _CameraFlashIconState extends State<CameraFlashIcon> {
             width: 60,
             height: 60,
             child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: _currentRotationAngle, end: _targetRotationAngle),
-              duration: const Duration(milliseconds: 500), // Smooth animation duration
+              tween: Tween<double>(
+                begin: _currentRotationAngle,
+                end: _targetRotationAngle,
+              ),
+              duration: const Duration(
+                milliseconds: 500,
+              ), // Smooth animation duration
               curve: Curves.easeOut,
               onEnd: () {
-                _currentRotationAngle = _targetRotationAngle; // Store the final angle
+                _currentRotationAngle =
+                    _targetRotationAngle; // Store the final angle
               },
               builder: (BuildContext context, double angle, Widget? child) {
                 return Transform.rotate(angle: angle, child: child);
@@ -74,7 +81,7 @@ class _CameraFlashIconState extends State<CameraFlashIcon> {
                   widget.flashControlBuilder ??
                   ClipOval(
                     child: Container(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       padding: const EdgeInsets.all(2.0),
                       child: Icon(widget.flashIcon, color: Colors.white),
                     ),

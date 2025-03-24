@@ -36,8 +36,10 @@ class _ImageViewerState extends State<ImageViewer> {
   }
 
   Future<void> _getInitialOrientation() async {
-    final NativeDeviceOrientation orientation = await NativeDeviceOrientationCommunicator()
-        .orientation(useSensor: true);
+    final NativeDeviceOrientation orientation =
+        await NativeDeviceOrientationCommunicator().orientation(
+          useSensor: true,
+        );
 
     if (mounted) {
       // Prevent calling setState on an unmounted widget
@@ -51,22 +53,22 @@ class _ImageViewerState extends State<ImageViewer> {
   }
 
   void _listenToOrientationChanges() {
-    NativeDeviceOrientationCommunicator().onOrientationChanged(useSensor: true).listen((
-      NativeDeviceOrientation orientation,
-    ) {
-      if (_debounceTimer?.isActive ?? false) {
-        _debounceTimer!.cancel(); // Cancel previous timer
-      }
+    NativeDeviceOrientationCommunicator()
+        .onOrientationChanged(useSensor: true)
+        .listen((NativeDeviceOrientation orientation) {
+          if (_debounceTimer?.isActive ?? false) {
+            _debounceTimer!.cancel(); // Cancel previous timer
+          }
 
-      _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          // Check if widget is still in the tree
-          setState(() {
-            _currentOrientation = orientation;
+          _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              // Check if widget is still in the tree
+              setState(() {
+                _currentOrientation = orientation;
+              });
+            }
           });
-        }
-      });
-    });
+        });
   }
 
   @override
@@ -95,14 +97,18 @@ class _ImageViewerState extends State<ImageViewer> {
       // Initial orientation was portrait, rotate if switched to landscape
       if (_currentOrientation == NativeDeviceOrientation.landscapeLeft) {
         rotationAngle = 1.5708; // Rotate 90 degrees to landscape
-      } else if (_currentOrientation == NativeDeviceOrientation.landscapeRight) {
+      } else if (_currentOrientation ==
+          NativeDeviceOrientation.landscapeRight) {
         rotationAngle = -1.5708; // Rotate -90 degrees to landscape
       }
     }
 
     return FutureBuilder<ImageProvider<Object>?>(
       future: widget.image,
-      builder: (BuildContext context, AsyncSnapshot<ImageProvider<Object>?> snapshot) {
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<ImageProvider<Object>?> snapshot,
+      ) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError || !snapshot.hasData) {
@@ -116,14 +122,18 @@ class _ImageViewerState extends State<ImageViewer> {
                   child: Transform.rotate(
                     angle: rotationAngle,
                     child: PhotoViewGallery(
-                      backgroundDecoration: const BoxDecoration(color: Colors.black),
+                      backgroundDecoration: const BoxDecoration(
+                        color: Colors.black,
+                      ),
                       loadingBuilder:
                           (BuildContext context, ImageChunkEvent? event) =>
                               const Center(child: CircularProgressIndicator()),
                       pageOptions: <PhotoViewGalleryPageOptions>[
                         PhotoViewGalleryPageOptions(
                           imageProvider: snapshot.data,
-                          heroAttributes: const PhotoViewHeroAttributes(tag: 'imageHero'),
+                          heroAttributes: const PhotoViewHeroAttributes(
+                            tag: 'imageHero',
+                          ),
                           minScale: PhotoViewComputedScale.contained,
                           initialScale: PhotoViewComputedScale.contained,
                           basePosition: Alignment.center,
@@ -139,8 +149,12 @@ class _ImageViewerState extends State<ImageViewer> {
                     onPressed: () => Navigator.pop(context),
                     iconSize: 35,
                     icon: CircleAvatar(
-                      backgroundColor: Colors.black.withOpacity(0.3),
-                      child: const Icon(Icons.clear, size: 30, color: Colors.white),
+                      backgroundColor: Colors.black.withValues(alpha: 0.3),
+                      child: const Icon(
+                        Icons.clear,
+                        size: 30,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -197,8 +211,10 @@ class _ConfirmButtonState extends State<ConfirmButton> {
 
   double _getRotationAngle(NativeDeviceOrientation orientation) {
     return switch (orientation) {
-      NativeDeviceOrientation.landscapeLeft => math.pi / 2, // Rotate +90 degrees
-      NativeDeviceOrientation.landscapeRight => -math.pi / 2, // Rotate -90 degrees
+      NativeDeviceOrientation.landscapeLeft =>
+        math.pi / 2, // Rotate +90 degrees
+      NativeDeviceOrientation.landscapeRight =>
+        -math.pi / 2, // Rotate -90 degrees
       NativeDeviceOrientation.portraitDown => math.pi, // Upside down
       (NativeDeviceOrientation.portraitUp || NativeDeviceOrientation.unknown) =>
         0, // Default portrait
@@ -216,9 +232,8 @@ class _ConfirmButtonState extends State<ConfirmButton> {
     return NativeDeviceOrientationReader(
       useSensor: true,
       builder: (BuildContext context) {
-        final NativeDeviceOrientation orientation = NativeDeviceOrientationReader.orientation(
-          context,
-        );
+        final NativeDeviceOrientation orientation =
+            NativeDeviceOrientationReader.orientation(context);
 
         final double newAngle = _getRotationAngle(orientation);
 
@@ -239,11 +254,17 @@ class _ConfirmButtonState extends State<ConfirmButton> {
             }),
           ),
           child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: _currentRotationAngle, end: _targetRotationAngle),
-            duration: const Duration(milliseconds: 500), // Smooth animation duration
+            tween: Tween<double>(
+              begin: _currentRotationAngle,
+              end: _targetRotationAngle,
+            ),
+            duration: const Duration(
+              milliseconds: 500,
+            ), // Smooth animation duration
             curve: Curves.easeOut,
             onEnd: () {
-              _currentRotationAngle = _targetRotationAngle; // Store the final angle
+              _currentRotationAngle =
+                  _targetRotationAngle; // Store the final angle
             },
             builder: (BuildContext context, double angle, Widget? child) {
               return Transform.rotate(angle: angle, child: child);
