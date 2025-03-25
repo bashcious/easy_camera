@@ -41,6 +41,8 @@ class _ImageViewerState extends State<ImageViewer> {
           useSensor: true,
         );
 
+        
+
     if (mounted) {
       // Prevent calling setState on an unmounted widget
       setState(() {

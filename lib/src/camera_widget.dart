@@ -6,6 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_editor/image_editor.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 
 import 'camera_config.dart';
 import 'easy_camera.dart';
@@ -125,9 +126,13 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   /// Controller for handling focus indicator animations.
   AnimationController? _animationController;
 
+  NativeDeviceOrientation _initialOrientation = NativeDeviceOrientation.unknown;
+
   @override
   void initState() {
     super.initState();
+
+    _getInitialOrientation();
 
     // Lock screen orientation to portrait
     SystemChrome.setPreferredOrientations(<DeviceOrientation>[
@@ -173,8 +178,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     /// Removes this widget from the app lifecycle observer list.
     WidgetsBinding.instance.removeObserver(this);
 
-    // Reset to system default orientations when leaving the screen
-    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    // Reset to initial orientation when leaving the screen
+    SystemChrome.setPreferredOrientations([
+      _initialOrientation.deviceOrientation!,
+    ]);
 
     /// Disposes resources only if the camera controller is initialized.
     if (_controller?.value.isInitialized ?? false) {
@@ -203,6 +210,20 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       /// Reinitialize the camera to restore functionality.
       _initializeCamera();
       setState(() => _isAppInBackground = false);
+    }
+  }
+
+  Future<void> _getInitialOrientation() async {
+    final NativeDeviceOrientation orientation =
+        await NativeDeviceOrientationCommunicator().orientation(
+          useSensor: true,
+        );
+
+    if (mounted) {
+      // Prevent calling setState on an unmounted widget
+      setState(() {
+        _initialOrientation = orientation;
+      });
     }
   }
 

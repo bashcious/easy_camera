@@ -68,13 +68,18 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text("Easy Camera"),
       ),
       body: Center(
-        child: Container(
-          width: double.infinity,
-          color: Colors.blueAccent,
-          child:
-              currentFile != null
-                  ? Image.file(currentFile!, fit: BoxFit.fitWidth)
-                  : null,
+        child: Column(
+          children: [
+            Text(MediaQuery.orientationOf(context).toString()),
+            Container(
+              width: double.infinity,
+              color: Colors.blueAccent,
+              child:
+                  currentFile != null
+                      ? Image.file(currentFile!, fit: BoxFit.fitWidth)
+                      : null,
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
