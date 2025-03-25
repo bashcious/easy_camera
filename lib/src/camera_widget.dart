@@ -6,7 +6,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_editor/image_editor.dart';
-import 'package:native_device_orientation/native_device_orientation.dart';
 
 import 'camera_config.dart';
 import 'easy_camera.dart';
@@ -126,19 +125,11 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   /// Controller for handling focus indicator animations.
   AnimationController? _animationController;
 
-  NativeDeviceOrientation _initialOrientation = NativeDeviceOrientation.unknown;
+  CameraController? cameraController;
 
   @override
   void initState() {
     super.initState();
-
-    _getInitialOrientation();
-
-    // Lock screen orientation to portrait
-    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
 
     /// Observes app lifecycle changes (e.g., background/foreground state).
     WidgetsBinding.instance.addObserver(this);
@@ -178,16 +169,15 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     /// Removes this widget from the app lifecycle observer list.
     WidgetsBinding.instance.removeObserver(this);
 
-    // Reset to initial orientation when leaving the screen
-    SystemChrome.setPreferredOrientations([
-      _initialOrientation.deviceOrientation!,
-    ]);
-
     /// Disposes resources only if the camera controller is initialized.
     if (_controller?.value.isInitialized ?? false) {
       _focusFrame?.dispose(); // Dispose of the focus frame notifier.
       _animationController?.dispose(); // Dispose of the animation controller.
       _controller?.dispose(); // Dispose of the camera controller.
+    }
+
+    if (cameraController?.value.isInitialized ?? false) {
+      cameraController?.dispose();
     }
 
     super.dispose();
@@ -210,20 +200,6 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       /// Reinitialize the camera to restore functionality.
       _initializeCamera();
       setState(() => _isAppInBackground = false);
-    }
-  }
-
-  Future<void> _getInitialOrientation() async {
-    final NativeDeviceOrientation orientation =
-        await NativeDeviceOrientationCommunicator().orientation(
-          useSensor: true,
-        );
-
-    if (mounted) {
-      // Prevent calling setState on an unmounted widget
-      setState(() {
-        _initialOrientation = orientation;
-      });
     }
   }
 
@@ -296,13 +272,25 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         _availableFlashMode.indexOf(widget.config.defaultFlashType),
       );
 
-      // Lock capture orientation to portrait mode
-      await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
-
       // Update UI state
       // setState(() {});
     } catch (e) {
       logError('Camera initialization failed: $e');
+    }
+  }
+
+  Future<void> _setCameraOrientation(DeviceOrientation orientation) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    try {
+      await _controller!.setFocusMode(
+        FocusMode.auto,
+      ); // Ensure focus remains stable
+      await _controller!.lockCaptureOrientation(
+        orientation,
+      ); // Lock the new orientation
+    } catch (e) {
+      logError("Failed to update camera orientation: $e");
     }
   }
 
@@ -330,7 +318,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
   @override
   Widget build(BuildContext context) {
-    final CameraController? cameraController = _controller;
+    cameraController = _controller;
     final ui.Size screenSize = MediaQuery.sizeOf(context);
 
     return SafeArea(
@@ -346,7 +334,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                   children: <Widget>[
                     // Display the camera preview if the controller is initialized
                     if (cameraController != null &&
-                        cameraController.value.isInitialized) ...<Widget>[
+                        cameraController!.value.isInitialized) ...<Widget>[
                       if (widget.config.cameraPreviewSize ==
                           CameraPreviewSize.fill)
                         Transform.scale(
@@ -360,13 +348,13 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                                   width: screenSize.width,
                                   height:
                                       screenSize.width *
-                                      cameraController.value.aspectRatio,
+                                      cameraController!.value.aspectRatio,
                                   child: Stack(
                                     fit: StackFit.expand,
                                     children: <Widget>[
                                       _autoFocusAnimationWidget(
                                         camera: _buildCameraView(
-                                          cameraController,
+                                          cameraController!,
                                         ),
                                       ),
                                     ],
@@ -377,7 +365,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                           ),
                         )
                       else
-                        _buildCameraPreview(cameraController),
+                        _buildCameraPreview(cameraController!),
                     ] else
                       Container(
                         color: Colors.black,
@@ -412,43 +400,32 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     );
   }
 
-  /// Builds the camera preview widget with gesture controls for scaling and focusing.
-  Widget _buildCameraView(CameraController controller) {
-    return Listener(
-      /// Tracks the number of active touch points (used for multi-touch gestures).
-      onPointerDown: (_) => _pointers++,
-      onPointerUp: (_) => _pointers--,
+  /// Builds the camera preview with proper aspect ratio handling and scaling.
+  Widget _buildCameraPreview(CameraController controller) {
+    final ui.Size size = MediaQuery.sizeOf(context);
 
-      child: CameraPreview(
-        controller,
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        // Determine the correct camera orientation
+        DeviceOrientation cameraOrientation = DeviceOrientation.portraitUp;
 
-              /// Handles zoom gesture start
-              onScaleStart: _handleScaleStart,
+        if (orientation == Orientation.landscape) {
+          cameraOrientation = DeviceOrientation.landscapeLeft;
+        } else {
+          cameraOrientation = DeviceOrientation.portraitUp;
+        }
 
-              /// Handles zoom updates when scaling
-              onScaleUpdate: _handleScaleUpdate,
+        // Set the camera orientation dynamically
+        _setCameraOrientation(cameraOrientation);
 
-              /// Handles focus when the user taps the preview
-              onTapDown:
-                  (TapDownDetails details) =>
-                      _onViewFinderTap(details, constraints),
-
-              /// Plays the autofocus animation when tap is released
-              onTapUp: _onTapPlayFocusAnimation,
-            );
-          },
-        ),
-      ),
+        return orientation == Orientation.portrait
+            ? _buildPortraitCameraView(controller, size)
+            : _buildLandscapeCameraView(controller, size);
+      },
     );
   }
 
-  /// Builds the camera preview with proper aspect ratio handling and scaling.
-  Widget _buildCameraPreview(CameraController controller) {
-    final ui.Size size = MediaQuery.of(context).size;
+  Widget _buildPortraitCameraView(CameraController controller, ui.Size size) {
     final Widget area = ClipRect(
       child: OverflowBox(
         child: FittedBox(
@@ -497,6 +474,98 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                   : const SizedBox.shrink(),
         ),
       ],
+    );
+  }
+
+  Widget _buildLandscapeCameraView(CameraController controller, ui.Size size) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _clearWidget(),
+        Flexible(
+          child: RepaintBoundary(
+            key: _cameraWidgetKey,
+            child: SizedBox(
+              width: size.width,
+              height: size.width * controller.value.aspectRatio,
+              child: Stack(
+                children: <Widget>[
+                  _autoFocusAnimationWidget(
+                    camera: _buildCameraView(controller),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Camera controls at the bottom
+        Container(
+          height: double.infinity,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child:
+              (widget.config.showControls &&
+                      widget.config.cameraPreviewSize != CameraPreviewSize.fill)
+                  ? Column(
+                    spacing: 20,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      // Switch camera button (or placeholder if disabled)
+                      if (widget.config.showCameraSwitchIcon)
+                        _buildCameraSwitchButton()
+                      else
+                        const SizedBox(height: 60, width: 60),
+
+                      // Capture button with spacing
+                      if (widget.config.showCaptureIcon) ...<Widget>[
+                        const SizedBox(width: 20),
+                        _buildCaptureButton(),
+                        const SizedBox(width: 20),
+                      ],
+                      // Flash control button (or placeholder if disabled)
+                      if (widget.config.showFlashControl)
+                        _buildFlashToggleButton()
+                      else
+                        const SizedBox(height: 60, width: 60),
+                    ],
+                  )
+                  : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the camera preview widget with gesture controls for scaling and focusing.
+  Widget _buildCameraView(CameraController controller) {
+    return Listener(
+      /// Tracks the number of active touch points (used for multi-touch gestures).
+      onPointerDown: (_) => _pointers++,
+      onPointerUp: (_) => _pointers--,
+
+      child: CameraPreview(
+        controller,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+
+              /// Handles zoom gesture start
+              onScaleStart: _handleScaleStart,
+
+              /// Handles zoom updates when scaling
+              onScaleUpdate: _handleScaleUpdate,
+
+              /// Handles focus when the user taps the preview
+              onTapDown:
+                  (TapDownDetails details) =>
+                      _onViewFinderTap(details, constraints),
+
+              /// Plays the autofocus animation when tap is released
+              onTapUp: _onTapPlayFocusAnimation,
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -613,6 +682,11 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   }
 
   Future<void> _onTakePictureButtonPressed() async {
+    final bool isControllerNoOrNot = _controller == null ? true : false;
+    debugPrint(
+      'isCameraReady: _isClick: $_isClick, isControllerNull: $isControllerNoOrNot, isInitialized: ${_controller?.value.isInitialized}',
+    );
+
     if (_isClick || _controller == null || !_controller!.value.isInitialized) {
       return;
     }
@@ -657,6 +731,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
   /// Captures an image using the camera and processes it based on the selected settings.
   Future<XFile?> _takePicture() async {
+    Uint8List? processedBytes;
+
     // Check if the camera controller is available and initialized.
     if (_controller == null || !_controller!.value.isInitialized) {
       logError('Error: No camera selected or not initialized.');
@@ -719,12 +795,15 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           option.addOption(const FlipOption());
         }
 
-        // Process the image and replace the file with the cropped/flipped version.
-        final Uint8List? processedBytes = await ImageEditor.editImage(
-          image: bytes,
-          imageEditorOption: option,
-        );
-
+        try {
+          // Process the image and replace the file with the cropped/flipped version.
+          processedBytes = await ImageEditor.editImage(
+            image: bytes,
+            imageEditorOption: option,
+          );
+        } catch (e) {
+          logError('ImageEditor failed: $e');
+        }
         if (processedBytes != null) {
           await File(file.path).delete(); // Delete the original file.
           await File(

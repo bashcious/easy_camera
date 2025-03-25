@@ -12,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   image_editor: ^1.6.0
-  native_device_orientation: ^2.0.3
   photo_view: ^0.15.0
   plugin_platform_interface: ^2.1.8
 
