@@ -6,6 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_editor/image_editor.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 
 import 'camera_config.dart';
 import 'easy_camera.dart';
@@ -16,8 +17,8 @@ import 'logger.dart';
 import 'switch_camera_icon.dart';
 import 'take_photo_button.dart';
 
-typedef FlashControlBuilder =
-    Widget Function(BuildContext context, CameraFlashType mode);
+typedef FlashControlBuilder = Widget Function(
+    BuildContext context, CameraFlashType mode);
 
 /// A customizable camera widget that provides an interface for capturing images
 /// with various configurations such as resolution, camera type, flash control,
@@ -224,14 +225,13 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   /// Initializes the camera with the selected lens direction and settings.
   Future<void> _initializeCamera() async {
     // Filter available cameras based on the selected lens direction
-    final List<CameraDescription> cameras =
-        EasyCamera.cameras
-            .where(
-              (CameraDescription c) =>
-                  c.lensDirection ==
-                  _availableCameraType[_currentCameraType].cameraLensDirection,
-            )
-            .toList();
+    final List<CameraDescription> cameras = EasyCamera.cameras
+        .where(
+          (CameraDescription c) =>
+              c.lensDirection ==
+              _availableCameraType[_currentCameraType].cameraLensDirection,
+        )
+        .toList();
 
     // Ensure at least one matching camera is found
     if (cameras.isEmpty) {
@@ -256,11 +256,11 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       // Fetch the available zoom range
       final List<Future<void>> zoomLevelFutures = <Future<void>>[
         _controller!.getMaxZoomLevel().then(
-          (double value) => _maxAvailableZoom = value,
-        ),
+              (double value) => _maxAvailableZoom = value,
+            ),
         _controller!.getMinZoomLevel().then(
-          (double value) => _minAvailableZoom = value,
-        ),
+              (double value) => _minAvailableZoom = value,
+            ),
       ];
       await Future.wait(zoomLevelFutures);
 
@@ -322,80 +322,78 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     final ui.Size screenSize = MediaQuery.sizeOf(context);
 
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body:
-            _isAppInBackground
-                ? Container(
-                  color: Colors.black,
-                ) // Show a black screen when app is in the background
-                : Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    // Display the camera preview if the controller is initialized
-                    if (cameraController != null &&
-                        cameraController!.value.isInitialized) ...<Widget>[
-                      if (widget.config.cameraPreviewSize ==
-                          CameraPreviewSize.fill)
-                        Transform.scale(
-                          scale: 1.0,
-                          child: AspectRatio(
-                            aspectRatio: screenSize.aspectRatio,
-                            child: OverflowBox(
-                              child: FittedBox(
-                                fit: BoxFit.fitHeight,
-                                child: SizedBox(
-                                  width: screenSize.width,
-                                  height:
-                                      screenSize.width *
-                                      cameraController!.value.aspectRatio,
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: <Widget>[
-                                      _autoFocusAnimationWidget(
-                                        camera: _buildCameraView(
-                                          cameraController!,
-                                        ),
+        body: _isAppInBackground
+            ? Container(
+                color: Colors.black,
+              ) // Show a black screen when app is in the background
+            : Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  // Display the camera preview if the controller is initialized
+                  if (cameraController != null &&
+                      cameraController!.value.isInitialized) ...<Widget>[
+                    if (widget.config.cameraPreviewSize ==
+                        CameraPreviewSize.fill)
+                      Transform.scale(
+                        scale: 1.0,
+                        child: AspectRatio(
+                          aspectRatio: screenSize.aspectRatio,
+                          child: OverflowBox(
+                            child: FittedBox(
+                              fit: BoxFit.fitHeight,
+                              child: SizedBox(
+                                width: screenSize.width,
+                                height: screenSize.width *
+                                    cameraController!.value.aspectRatio,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: <Widget>[
+                                    _autoFocusAnimationWidget(
+                                      camera: _buildCameraView(
+                                        cameraController!,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                        )
-                      else
-                        _buildCameraPreview(cameraController!),
-                    ] else
-                      Container(
-                        color: Colors.black,
-                      ), // Placeholder if the camera is not ready
-                    // Camera control buttons (flash, capture, switch camera)
-                    if (widget.config.showControls &&
-                        widget.config.cameraPreviewSize ==
-                            CameraPreviewSize.fill) ...<Widget>[
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: ColoredBox(
-                            color: Colors.transparent,
-                            child: _controlsWidget(),
-                          ),
+                        ),
+                      )
+                    else
+                      _buildCameraPreview(cameraController!),
+                  ] else
+                    Container(
+                      color: Colors.black,
+                    ), // Placeholder if the camera is not ready
+                  // Camera control buttons (flash, capture, switch camera)
+                  if (widget.config.showControls &&
+                      widget.config.cameraPreviewSize ==
+                          CameraPreviewSize.fill) ...<Widget>[
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ColoredBox(
+                          color: Colors.transparent,
+                          child: _controlsWidget(),
                         ),
                       ),
-                    ],
-
-                    // Close button (top-left)
-                    if (widget.config.showControls &&
-                        widget.config.cameraPreviewSize ==
-                            CameraPreviewSize.fill)
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: _clearWidget(),
-                      ),
+                    ),
                   ],
-                ),
+
+                  // Close button (top-left)
+                  if (widget.config.showControls &&
+                      widget.config.cameraPreviewSize == CameraPreviewSize.fill)
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: _clearWidget(),
+                    ),
+                ],
+              ),
       ),
     );
   }
@@ -404,21 +402,35 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   Widget _buildCameraPreview(CameraController controller) {
     final ui.Size size = MediaQuery.sizeOf(context);
 
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        // Determine the correct camera orientation
+    return NativeDeviceOrientationReader(
+      builder: (context) {
+        final NativeDeviceOrientation orientation =
+            NativeDeviceOrientationReader.orientation(context);
+
+        // Map NativeDeviceOrientation to Camera DeviceOrientation
         DeviceOrientation cameraOrientation = DeviceOrientation.portraitUp;
 
-        if (orientation == Orientation.landscape) {
-          cameraOrientation = DeviceOrientation.landscapeLeft;
-        } else {
-          cameraOrientation = DeviceOrientation.portraitUp;
+        switch (orientation) {
+          case NativeDeviceOrientation.landscapeLeft:
+            cameraOrientation = DeviceOrientation.landscapeLeft;
+            break;
+          case NativeDeviceOrientation.landscapeRight:
+            cameraOrientation = DeviceOrientation.landscapeRight;
+            break;
+          case NativeDeviceOrientation.portraitDown:
+            cameraOrientation = DeviceOrientation.portraitDown;
+            break;
+          case NativeDeviceOrientation.portraitUp:
+          case NativeDeviceOrientation.unknown:
+            cameraOrientation = DeviceOrientation.portraitUp;
+            break;
         }
 
         // Set the camera orientation dynamically
         _setCameraOrientation(cameraOrientation);
 
-        return orientation == Orientation.portrait
+        return (orientation == NativeDeviceOrientation.portraitUp ||
+                orientation == NativeDeviceOrientation.portraitDown)
             ? _buildPortraitCameraView(controller, size)
             : _buildLandscapeCameraView(controller, size);
       },
@@ -467,11 +479,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           height: 150,
           alignment: Alignment.topCenter,
           padding: const EdgeInsets.symmetric(vertical: 20),
-          child:
-              (widget.config.showControls &&
-                      widget.config.cameraPreviewSize != CameraPreviewSize.fill)
-                  ? _controlsWidget()
-                  : const SizedBox.shrink(),
+          child: (widget.config.showControls &&
+                  widget.config.cameraPreviewSize != CameraPreviewSize.fill)
+              ? _controlsWidget()
+              : const SizedBox.shrink(),
         ),
       ],
     );
@@ -485,7 +496,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         Flexible(
           child: RepaintBoundary(
             key: _cameraWidgetKey,
-            child: SizedBox(
+            child: Container(
+              alignment: Alignment.center,
               width: size.width,
               height: size.width * controller.value.aspectRatio,
               child: Stack(
@@ -503,33 +515,32 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           height: double.infinity,
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child:
-              (widget.config.showControls &&
-                      widget.config.cameraPreviewSize != CameraPreviewSize.fill)
-                  ? Column(
-                    spacing: 20,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      // Switch camera button (or placeholder if disabled)
-                      if (widget.config.showCameraSwitchIcon)
-                        _buildCameraSwitchButton()
-                      else
-                        const SizedBox(height: 60, width: 60),
+          child: (widget.config.showControls &&
+                  widget.config.cameraPreviewSize != CameraPreviewSize.fill)
+              ? Column(
+                  spacing: 20,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    // Switch camera button (or placeholder if disabled)
+                    if (widget.config.showCameraSwitchIcon)
+                      _buildCameraSwitchButton()
+                    else
+                      const SizedBox(height: 60, width: 60),
 
-                      // Capture button with spacing
-                      if (widget.config.showCaptureIcon) ...<Widget>[
-                        const SizedBox(width: 20),
-                        _buildCaptureButton(),
-                        const SizedBox(width: 20),
-                      ],
-                      // Flash control button (or placeholder if disabled)
-                      if (widget.config.showFlashControl)
-                        _buildFlashToggleButton()
-                      else
-                        const SizedBox(height: 60, width: 60),
+                    // Capture button with spacing
+                    if (widget.config.showCaptureIcon) ...<Widget>[
+                      const SizedBox(width: 20),
+                      _buildCaptureButton(),
+                      const SizedBox(width: 20),
                     ],
-                  )
-                  : const SizedBox.shrink(),
+                    // Flash control button (or placeholder if disabled)
+                    if (widget.config.showFlashControl)
+                      _buildFlashToggleButton()
+                    else
+                      const SizedBox(height: 60, width: 60),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );
@@ -556,9 +567,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
               onScaleUpdate: _handleScaleUpdate,
 
               /// Handles focus when the user taps the preview
-              onTapDown:
-                  (TapDownDetails details) =>
-                      _onViewFinderTap(details, constraints),
+              onTapDown: (TapDownDetails details) =>
+                  _onViewFinderTap(details, constraints),
 
               /// Plays the autofocus animation when tap is released
               onTapUp: _onTapPlayFocusAnimation,
@@ -599,15 +609,14 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   Widget _buildCameraSwitchButton() {
     return widget.config.cameraSwitchIcon ??
         CameraSwitchIcon(
-          onTap:
-              _controller?.value.isInitialized ?? false
-                  ? () {
-                    _currentCameraType =
-                        (_currentCameraType + 1) % _availableCameraType.length;
+          onTap: _controller?.value.isInitialized ?? false
+              ? () {
+                  _currentCameraType =
+                      (_currentCameraType + 1) % _availableCameraType.length;
 
-                    _initializeCamera();
-                  }
-                  : null,
+                  _initializeCamera();
+                }
+              : null,
         );
   }
 
@@ -634,10 +643,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
     return CameraFlashIcon(
       flashIcon: flashIcon,
-      onTap:
-          () => _changeFlashMode(
-            (_currentFlashMode + 1) % _availableFlashMode.length,
-          ),
+      onTap: () => _changeFlashMode(
+        (_currentFlashMode + 1) % _availableFlashMode.length,
+      ),
       flashControlBuilder: widget.config.flashControlBuilder?.call(
         context,
         currentFlashMode,
@@ -649,10 +657,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   IconData _getFlashIcon(CameraFlashType flashType) {
     const Map<CameraFlashType, IconData> flashIcons =
         <CameraFlashType, IconData>{
-          CameraFlashType.always: Icons.flash_on,
-          CameraFlashType.off: Icons.flash_off,
-          CameraFlashType.auto: Icons.flash_auto,
-        };
+      CameraFlashType.always: Icons.flash_on,
+      CameraFlashType.off: Icons.flash_off,
+      CameraFlashType.auto: Icons.flash_auto,
+    };
 
     return flashIcons[flashType] ?? Icons.flash_auto;
   }
@@ -708,9 +716,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           final dynamic result = await Navigator.push(
             context,
             MaterialPageRoute<dynamic>(
-              builder:
-                  (BuildContext context) =>
-                      ImageViewer(image: _fileToImageProvider(File(file.path))),
+              builder: (BuildContext context) =>
+                  ImageViewer(image: _fileToImageProvider(File(file.path))),
             ),
           );
           if (result != null && widget.onCapture != null) {
@@ -778,8 +785,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         final ui.Image image = await _convertUint8ListToImage(bytes);
         final double width = image.width.toDouble();
         final double height = image.height.toDouble();
-        final double realHeight =
-            width /
+        final double realHeight = width /
             widget.config.cameraPreviewSize.scale; // Calculate new height.
         final double topY =
             (height - realHeight) / 2; // Center cropping position.
@@ -858,8 +864,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                     top: offset.dy,
 
                     child: Opacity(
-                      opacity:
-                          opacityTween?.value ??
+                      opacity: opacityTween?.value ??
                           0, // Apply animated opacity effect.
 
                       child: Container(
@@ -868,11 +873,9 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                           color:
                               Colors.transparent, // Ensure background is clear.
                           border: Border.all(
-                            color:
-                                widget.config.focusColor ??
+                            color: widget.config.focusColor ??
                                 Colors.white, // Use user-defined focus color.
-                            width:
-                                thicknessTween?.value ??
+                            width: thicknessTween?.value ??
                                 0, // Adjust thickness with animation.
                           ),
                         ),
