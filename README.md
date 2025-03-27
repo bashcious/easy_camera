@@ -69,6 +69,14 @@ EasyCamera.cameraView(
 );
 ```
 
+## Preview
+
+### Portrait Mode
+![EasyCamera Portrait](assets/screenshots/portrait.png)
+
+### Landscape Mode
+![EasyCamera Landscape](assets/screenshots/landscape.png)
+
 ## Camera Configuration
 
 The `CameraConfig` class allows customization of various camera settings:
@@ -96,8 +104,8 @@ const CameraConfig({
 ```
 
 ### Available Options
-| Parameter                | Description                                       |
-|--------------------------|---------------------------------------------------|
+| Parameter                | Description                                      |
+|--------------------------|--------------------------------------------------|
 | `imageResolution`        | Image resolution (low, medium, high)             |
 | `defaultCameraType`      | Front or back camera                             |
 | `defaultFlashType`       | Flash mode (on, off, auto)                       |
@@ -136,4 +144,3 @@ await EasyCamera.initialize(printLogs: true);
 
 ## License
 This project is licensed under the MIT License. Feel free to use and modify it as needed.
-
