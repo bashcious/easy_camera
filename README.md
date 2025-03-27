@@ -72,10 +72,13 @@ EasyCamera.cameraView(
 ## Preview
 
 ### Portrait Mode
-![EasyCamera Portrait](assets/screenshots/portrait.png)
+
+![portrait](https://github.com/user-attachments/assets/fc6555ed-c4fa-48ce-bdac-bb041f33a6f9)
 
 ### Landscape Mode
-![EasyCamera Landscape](assets/screenshots/landscape.png)
+
+![landscape](https://github.com/user-attachments/assets/b329a8b3-6898-4162-9e49-ab5916a55e95)
+
 
 ## Camera Configuration
 
@@ -96,7 +99,8 @@ const CameraConfig({
   this.flashControlBuilder,
   this.closeIcon,
   this.cameraPreviewSize = CameraPreviewSize.fill,
-  this.minAvailableZoom = 1.0,
+  this.minAvailableZoom = 1.0,![portrait](https://github.com/user-attachments/assets/9472a3fb-69cd-4e03-b471-2745ad6cde5c)
+
   this.maxAvailableZoom = 1.0,
   this.focusColor = Colors.white,
   this.showImagePreview = true,
