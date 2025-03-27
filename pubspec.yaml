@@ -2,7 +2,7 @@ name: flutter_easy_camera
 description: "EasyCamera is a Flutter plugin for seamless camera integration,
   offering customizable settings, preview styles, and intuitive controls for
   capturing images."
-version: 0.0.7
+version: 0.0.6
 homepage: https://github.com/TheinvinciblePrints/easy_camera
 
 environment:
