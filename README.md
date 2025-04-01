@@ -99,8 +99,7 @@ const CameraConfig({
   this.flashControlBuilder,
   this.closeIcon,
   this.cameraPreviewSize = CameraPreviewSize.fill,
-  this.minAvailableZoom = 1.0,![portrait](https://github.com/user-attachments/assets/9472a3fb-69cd-4e03-b471-2745ad6cde5c)
-
+  this.minAvailableZoom = 1.0,
   this.maxAvailableZoom = 1.0,
   this.focusColor = Colors.white,
   this.showImagePreview = true,
