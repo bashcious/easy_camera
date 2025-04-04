@@ -15,7 +15,7 @@ Flutter EasyCamera is a Flutter plugin that simplifies camera integration with c
 Add the dependency in your `pubspec.yaml`:
 ```yaml
 dependencies:
-  easy_camera: latest_version
+  flutter_easy_camera: latest_version
 ```
 
 Then, run:
