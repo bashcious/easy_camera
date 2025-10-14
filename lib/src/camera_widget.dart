@@ -497,7 +497,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           Padding(
             padding: EdgeInsets.only(
               top: math.max(0, 24 - MediaQuery.of(context).padding.top),
-              left: math.max(MediaQuery.paddingOf(context).left, 16),
+              left: 16,
               right: 16,
               bottom: 8,
             ),
