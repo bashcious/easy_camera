@@ -47,6 +47,22 @@ class _MyHomePageState extends State<MyHomePage> {
       showFlashControl: true,
       showImagePreview: true,
       showCloseIcon: true,
+      closeIcon: Text(
+        'Cancel',
+        style: TextStyle(
+          fontSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      titleWidget: Text(
+        'Camera title',
+        style: TextStyle(
+          fontSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
 
     var returnedFile = await Navigator.push(

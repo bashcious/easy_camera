@@ -21,6 +21,7 @@ class CameraConfig {
     this.cameraSwitchIcon,
     this.flashControlBuilder,
     this.closeIcon,
+    this.titleWidget,
     this.cameraPreviewSize = CameraPreviewSize.fill,
     this.minAvailableZoom = 1.0,
     this.maxAvailableZoom = 1.0,
@@ -63,6 +64,9 @@ class CameraConfig {
 
   /// Custom widget for the close button.
   final Widget? closeIcon;
+
+  /// Custom widget for the title.
+  final Widget? titleWidget;
 
   /// Scaling option for the camera preview.
   final CameraPreviewSize cameraPreviewSize;
