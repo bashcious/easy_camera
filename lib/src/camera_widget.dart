@@ -714,7 +714,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
   Widget _getCloseButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: IconButton(
         iconSize: 30,
         padding: EdgeInsets.zero,
