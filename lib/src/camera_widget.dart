@@ -398,10 +398,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                         children: [
                           if (widget.config.titleWidget != null)
                             Padding(
-                              padding: EdgeInsetsGeometry.only(
-                                left: 8,
-                                right: 8,
-                                bottom: 8,
+                              padding: EdgeInsetsGeometry.symmetric(
+                                horizontal: 8,
                               ),
                               child: widget.config.titleWidget!,
                             ),
@@ -484,11 +482,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
             children: [
               if (widget.config.titleWidget != null)
                 Padding(
-                  padding: EdgeInsetsGeometry.only(
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
                   child: widget.config.titleWidget!,
                 ),
               _getCloseButton(),
@@ -530,7 +524,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
           Container(
             width: 100,
             child: Padding(
-              padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+              padding: EdgeInsetsGeometry.only(left: 8, bottom: 8, top: 16),
               child: widget.config.titleWidget!,
             ),
           ),
