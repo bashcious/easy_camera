@@ -502,7 +502,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
               bottom: 8,
             ),
             child: Container(
-              constraints: BoxConstraints(maxWidth: 150),
+              constraints: BoxConstraints(maxWidth: 100),
               child: widget.config.titleWidget!,
             ),
           ),
@@ -608,7 +608,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
               top: math.max(0, 24 - MediaQuery.of(context).padding.top),
               left: math.max(MediaQuery.paddingOf(context).left, 16),
               right: math.max(0, 16 - MediaQuery.of(context).padding.right),
-              bottom: 8,
+              bottom: 16,
             )
           : EdgeInsets.zero,
       child: Row(

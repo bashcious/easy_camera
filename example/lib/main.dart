@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       titleWidget: Text(
-        'Camera title',
+        'Take photo of the receipt',
         style: TextStyle(
           fontSize: 18,
           color: Colors.white,
