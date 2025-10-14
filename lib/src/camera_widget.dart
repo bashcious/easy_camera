@@ -390,29 +390,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                     // Close button (top-left)
                     Align(
                       alignment: Alignment.topLeft,
-                      child: Row(
-                        mainAxisAlignment: widget.config.titleWidget != null
-                            ? MainAxisAlignment.spaceBetween
-                            : MainAxisAlignment.start,
-                        children: [
-                          if (widget.config.titleWidget != null)
-                            Padding(
-                              padding: EdgeInsetsGeometry.only(
-                                left: math.max(
-                                  MediaQuery.paddingOf(context).left,
-                                  16,
-                                ),
-                                bottom: 8,
-                                top: math.max(
-                                  MediaQuery.paddingOf(context).top,
-                                  24,
-                                ),
-                              ),
-                              child: widget.config.titleWidget!,
-                            ),
-                          _getCloseButton(),
-                        ],
-                      ),
+                      child: _getHeaderView(),
                     ),
                   ],
                 ],
@@ -481,21 +459,8 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (widget.config.showControls &&
-            widget.config.cameraPreviewSize != CameraPreviewSize.fill)
-          Row(
-            mainAxisAlignment: widget.config.titleWidget != null
-                ? MainAxisAlignment.spaceBetween
-                : MainAxisAlignment.start,
-            children: [
-              if (widget.config.titleWidget != null)
-                Padding(
-                  padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
-                  child: widget.config.titleWidget!,
-                ),
-              _getCloseButton(),
-            ],
-          ),
+        if (widget.config.cameraPreviewSize != CameraPreviewSize.fill)
+          _getHeaderView(),
         // Camera preview with aspect ratio maintained
         Expanded(
           child: Stack(
@@ -529,15 +494,15 @@ class _CameraWidgetState extends State<EasyCameraWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.config.titleWidget != null)
-          Container(
-            width: 100,
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(
-                left: math.max(MediaQuery.paddingOf(context).left, 16),
-                right: 8,
-                bottom: 8,
-                top: math.max(MediaQuery.paddingOf(context).top, 24),
-              ),
+          Padding(
+            padding: EdgeInsets.only(
+              top: math.max(0, 24 - MediaQuery.of(context).padding.top),
+              left: math.max(MediaQuery.paddingOf(context).left, 16),
+              right: 16,
+              bottom: 8,
+            ),
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 200),
               child: widget.config.titleWidget!,
             ),
           ),
@@ -633,6 +598,35 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     );
   }
 
+  Widget _getHeaderView() {
+    return Padding(
+      padding:
+          widget.config.titleWidget != null ||
+              widget.config.closeIcon != null ||
+              widget.config.showCloseIcon
+          ? EdgeInsets.only(
+              top: math.max(0, 24 - MediaQuery.of(context).padding.top),
+              left: math.max(MediaQuery.paddingOf(context).left, 16),
+              right: math.max(0, 16 - MediaQuery.of(context).padding.right),
+              bottom: 8,
+            )
+          : EdgeInsets.zero,
+      child: Row(
+        mainAxisAlignment: widget.config.titleWidget != null
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.start,
+        children: [
+          if (widget.config.titleWidget != null)
+            Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: widget.config.titleWidget!,
+            ),
+          _getCloseButton(),
+        ],
+      ),
+    );
+  }
+
   Widget _controlsWidget() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -720,19 +714,16 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   }
 
   Widget _getCloseButton() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: IconButton(
-        iconSize: 30,
+    return IconButton(
+      iconSize: 30,
+      padding: EdgeInsets.zero,
+      style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
-        style: TextButton.styleFrom(
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(0, 0),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        icon: widget.config.closeIcon ?? _buildCloseIcon(),
-        onPressed: () => Navigator.pop(context),
+        minimumSize: const Size(0, 0),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+      icon: widget.config.closeIcon ?? _buildCloseIcon(),
+      onPressed: () => Navigator.pop(context),
     );
   }
 
