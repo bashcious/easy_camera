@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
@@ -398,11 +398,14 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                           if (widget.config.titleWidget != null)
                             Padding(
                               padding: EdgeInsetsGeometry.only(
-                                left: 16,
+                                left: math.max(
+                                  MediaQuery.paddingOf(context).left,
+                                  16,
+                                ),
                                 bottom: 8,
-                                top: max(
-                                  0,
-                                  (24) - MediaQuery.of(context).padding.top,
+                                top: math.max(
+                                  MediaQuery.paddingOf(context).top,
+                                  24,
                                 ),
                               ),
                               child: widget.config.titleWidget!,
@@ -530,10 +533,10 @@ class _CameraWidgetState extends State<EasyCameraWidget>
             width: 100,
             child: Padding(
               padding: EdgeInsetsGeometry.only(
-                left: 16,
+                left: math.max(MediaQuery.paddingOf(context).left, 16),
                 right: 8,
                 bottom: 8,
-                top: max(0, (24) - MediaQuery.of(context).padding.top),
+                top: math.max(MediaQuery.paddingOf(context).top, 24),
               ),
               child: widget.config.titleWidget!,
             ),
