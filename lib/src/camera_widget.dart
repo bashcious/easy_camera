@@ -496,13 +496,13 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         if (widget.config.titleWidget != null)
           Padding(
             padding: EdgeInsets.only(
-              top: math.max(0, 24 - MediaQuery.of(context).padding.top),
+              top: math.max(MediaQuery.paddingOf(context).top, 24),
               left: 16,
               right: 16,
               bottom: 8,
             ),
             child: Container(
-              constraints: BoxConstraints(maxWidth: 200),
+              constraints: BoxConstraints(maxWidth: 150),
               child: widget.config.titleWidget!,
             ),
           ),
