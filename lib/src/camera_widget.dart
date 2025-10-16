@@ -324,7 +324,6 @@ class _CameraWidgetState extends State<EasyCameraWidget>
 
     return SafeArea(
       bottom: false,
-      left: false,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: _isAppInBackground
@@ -388,10 +387,7 @@ class _CameraWidgetState extends State<EasyCameraWidget>
                     ],
 
                     // Close button (top-left)
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: _getHeaderView(),
-                    ),
+                    _getHeaderView(),
                   ],
                 ],
               ),
@@ -465,9 +461,17 @@ class _CameraWidgetState extends State<EasyCameraWidget>
         Expanded(
           child: Stack(
             children: <Widget>[
-              AspectRatio(
-                aspectRatio: widget.config.cameraPreviewSize.scale,
-                child: RepaintBoundary(key: _cameraWidgetKey, child: area),
+              Center(
+                child: AspectRatio(
+                  aspectRatio: widget.config.cameraPreviewSize.scale,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      RepaintBoundary(key: _cameraWidgetKey, child: area),
+                      _getTitle(),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -493,74 +497,64 @@ class _CameraWidgetState extends State<EasyCameraWidget>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.config.titleWidget != null)
-          Padding(
-            padding: EdgeInsets.only(
-              top: math.max(MediaQuery.paddingOf(context).top, 24),
-              left: 16,
-              right: 16,
-              bottom: 8,
-            ),
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 100),
-              child: widget.config.titleWidget!,
-            ),
-          ),
         Flexible(
-          child: RepaintBoundary(
-            key: _cameraWidgetKey,
-            child: Container(
-              alignment: Alignment.center,
-              width: size.width,
-              height: size.width * controller.value.aspectRatio,
-              child: Stack(
-                children: <Widget>[
-                  _autoFocusAnimationWidget(
-                    camera: _buildCameraView(controller),
+          child: Stack(
+            children: [
+              RepaintBoundary(
+                key: _cameraWidgetKey,
+                child: Container(
+                  alignment: Alignment.center,
+                  width: size.width,
+                  height: size.width * controller.value.aspectRatio,
+                  child: Stack(
+                    children: <Widget>[
+                      _autoFocusAnimationWidget(
+                        camera: _buildCameraView(controller),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              _getTitle(),
+            ],
           ),
         ),
-        // Camera controls at the bottom
-        Container(
-          height: double.infinity,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child:
-              (widget.config.showControls &&
-                  widget.config.cameraPreviewSize != CameraPreviewSize.fill)
-              ? Column(
-                  children: [
-                    Flexible(
-                      child: Column(
-                        spacing: 20,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          // Switch camera button (or placeholder if disabled)
-                          if (widget.config.showCameraSwitchIcon)
-                            _buildCameraSwitchButton()
-                          else
-                            const SizedBox(height: 60, width: 60),
+        if ((widget.config.showControls &&
+            widget.config.cameraPreviewSize != CameraPreviewSize.fill))
+          // Camera controls at the bottom
+          Container(
+            height: double.infinity,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                Flexible(
+                  child: Column(
+                    spacing: 20,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      // Switch camera button (or placeholder if disabled)
+                      if (widget.config.showCameraSwitchIcon)
+                        _buildCameraSwitchButton()
+                      else
+                        const SizedBox(height: 60, width: 60),
 
-                          // Capture button with spacing
-                          if (widget.config.showCaptureIcon) ...<Widget>[
-                            const SizedBox(width: 20),
-                            _buildCaptureButton(),
-                            const SizedBox(width: 20),
-                          ],
-                          // Flash control button (or placeholder if disabled)
-                          if (widget.config.showFlashControl)
-                            _buildFlashToggleButton(),
-                          _getCloseButton(),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink(),
-        ),
+                      // Capture button with spacing
+                      if (widget.config.showCaptureIcon) ...<Widget>[
+                        const SizedBox(width: 20),
+                        _buildCaptureButton(),
+                        const SizedBox(width: 20),
+                      ],
+                      // Flash control button (or placeholder if disabled)
+                      if (widget.config.showFlashControl)
+                        _buildFlashToggleButton(),
+                      _getCloseButton(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -599,31 +593,34 @@ class _CameraWidgetState extends State<EasyCameraWidget>
   }
 
   Widget _getHeaderView() {
-    return Padding(
-      padding:
-          widget.config.titleWidget != null ||
-              widget.config.closeIcon != null ||
-              widget.config.showCloseIcon
+    return Container(
+      alignment: Alignment.topRight,
+      padding: widget.config.closeIcon != null || widget.config.showCloseIcon
           ? EdgeInsets.only(
               top: math.max(0, 24 - MediaQuery.of(context).padding.top),
-              left: math.max(MediaQuery.paddingOf(context).left, 16),
               right: math.max(0, 16 - MediaQuery.of(context).padding.right),
               bottom: 16,
             )
           : EdgeInsets.zero,
-      child: Row(
-        mainAxisAlignment: widget.config.titleWidget != null
-            ? MainAxisAlignment.spaceBetween
-            : MainAxisAlignment.start,
-        children: [
-          if (widget.config.titleWidget != null)
-            Padding(
-              padding: EdgeInsets.only(right: 8),
+      child: _getCloseButton(),
+    );
+  }
+
+  Widget _getTitle() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: widget.config.titleWidget != null
+          ? Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+
               child: widget.config.titleWidget!,
-            ),
-          _getCloseButton(),
-        ],
-      ),
+            )
+          : SizedBox.shrink(),
     );
   }
 
